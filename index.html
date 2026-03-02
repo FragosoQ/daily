@@ -54,7 +54,7 @@
             width: min(90vw, 1531px);
             aspect-ratio: 2 / 1;
             max-height: 72vh;
-            transform: translate(-5%, 26%) scale(1.5);
+            transform: translate(-5%, 16%) scale(1.5);
             transform-origin: center center;
         }
 
@@ -102,9 +102,9 @@
             width: var(--point-size, 4.656px);
             height: var(--point-size, 4.656px);
             transform: translate(-50%, -50%);
-            background: #00f2ff;
+            background: var(--pulse-color, #00f2ff);
             border-radius: 50%;
-            box-shadow: 0 0 15px #00f2ff, 0 0 30px rgba(0, 242, 255, 0.5);
+            box-shadow: var(--pulse-shadow, 0 0 15px #00f2ff), var(--pulse-shadow-soft, 0 0 30px rgba(0, 242, 255, 0.5));
         }
 
         .pulse-point::before,
@@ -116,10 +116,16 @@
             transform: translate(-50%, -50%);
             width: var(--point-size, 4.656px);
             height: var(--point-size, 4.656px);
-            border: 1.5px solid #00f2ff;
+            border: 1.5px solid var(--pulse-color, #00f2ff);
             border-radius: 50%;
             animation: ripple 2.5s infinite ease-out;
             opacity: 0;
+        }
+
+        .pulse-point--highlighted {
+            --pulse-color: #f97316;
+            --pulse-shadow: 0 0 15px #f97316;
+            --pulse-shadow-soft: 0 0 30px rgba(249, 115, 22, 0.5);
         }
 
         .pulse-point::after {
@@ -151,14 +157,49 @@
         .team-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(8, minmax(0, 1fr));
+            grid-template-rows: repeat(6, minmax(0, 1fr));
             column-gap: 0.4rem;
             row-gap: 0.005rem;
-            height: 100%;
+        }
+
+        .technical-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-rows: repeat(2, minmax(0, 1fr));
+            gap: 0.35rem;
+        }
+
+        .technical-ripple-dot {
+            position: relative;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #f97316;
+            box-shadow: 0 0 8px rgba(249, 115, 22, 0.9);
+            flex-shrink: 0;
+        }
+
+        .technical-ripple-dot::before,
+        .technical-ripple-dot::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            border: 1.2px solid rgba(249, 115, 22, 0.95);
+            border-radius: 50%;
+            animation: ripple 2.5s infinite ease-out;
+            opacity: 0;
+        }
+
+        .technical-ripple-dot::after {
+            animation-delay: 1.25s;
         }
 
         #teamList > div {
-            height: 60%;
+            height: 80%;
             align-self: start;
         }
     </style>
@@ -188,10 +229,11 @@
 
             <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center leading-none">
                 <div class="flex items-center gap-2">
-                    <span class="text-2xl font-black text-green-600">428 Dias</span>
+                    <img src="https://static.wixstatic.com/media/a6967f_63fc48d3787f4b99b28eb81d9aa33de8~mv2.png" alt="Escudo de segurança" class="w-5 h-5 object-contain" style="filter: brightness(0) invert(1);">
+                    <span class="text-2xl font-black text-white">428 Dias</span>
                     <div class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.7)]"></div>
                 </div>
-                <span class="text-[11px] text-slate-400 uppercase font-bold tracking-tight mt-1">Sem Acidentes</span>
+                <!--<span class="text-[11px] text-slate-400 uppercase font-bold tracking-tight mt-1">Sem Acidentes</span>-->
             </div>
 
             <div class="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col items-end gap-1 text-right">
@@ -206,18 +248,39 @@
                 <h3 class="text-[11px] font-bold uppercase text-slate-500 tracking-widest border-b border-slate-200 pb-3 mb-3 shrink-0">
                     Equipa Presente
                 </h3>
-                <div class="team-grid overflow-hidden" id="teamList">
-                    <!-- Gerado via JavaScript -->
+                <div class="flex flex-col gap-3 h-full overflow-hidden">
+                    <div class="team-grid overflow-hidden" id="teamList">
+                        <!-- Gerado via JavaScript -->
+                    </div>
+
+                    <div class="shrink-0">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-2">
+                            <h4 class="text-[10px] font-bold uppercase text-slate-500 tracking-wider flex items-center gap-1">
+                                <span aria-hidden="true">✈️</span>
+                                <span>Equipa Técnica</span>
+                                <span class="technical-ripple-dot" aria-hidden="true"></span>
+                            </h4>
+                            <button id="addTechnicalCardBtn" type="button" class="text-[8px] font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded-md transition-colors">
+                                Adicionar
+                            </button>
+                        </div>
+                        <div class="technical-grid" id="technicalTeamList">
+                            <!-- Gerado via JavaScript -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="glass-card p-4 h-28 shrink-0 bg-white/90">
+            <div class="glass-card p-4 h-28 shrink-0 bg-BLACK/50">
                 <h3 class="text-[11px] font-bold uppercase text-amber-600 tracking-widest mb-1 shrink-0">
                     🏆 Vitórias Internas
                 </h3>
-                <p class="text-[10px] text-slate-600 leading-tight bg-amber-50 p-2 rounded-xl border border-amber-200">
-                    "Novo recorde de eficiência na montagem! Parabéns à equipa."
-                </p>
+                <div class="grid grid-cols-2 gap-2 mt-1 mb-1">
+                    <div class="h-[3.63rem] overflow-hidden flex items-center rounded-md bg-white shadow-sm border-0">
+                        <img src="https://static.wixstatic.com/media/a6967f_3e83ef2a609a41f992131daaea8f0433~mv2.png" alt="Vitórias Internas" class="w-[105%] h-[105%] object-contain max-w-none max-h-none">
+                    </div>
+                    <div id="victoriesInternalText" contenteditable="true" class="h-12 text-[10px] text-white leading-tight outline-none cursor-text px-1 py-0.5"></div>
+                </div>
             </div>
         </aside>
 
@@ -233,16 +296,19 @@
             </div>
 
             <!-- WELCOME CARD SEM MARGEM À DIREITA E EM BAIXO -->
-            <div id="welcomeCard" class="glass-card p-4 bg-gradient-to-br from-blue-600 to-indigo-800 text-white shrink-0 h-28 shadow-xl relative overflow-hidden">
+            <div id="welcomeCard" style="background: radial-gradient(circle at center, rgba(81, 184, 234, 1) 0%, rgba(0, 0, 0, 1) 100%);" class="glass-card p-4 text-white shrink-0 h-28 shadow-xl relative overflow-hidden">
                 <div class="flex flex-col h-full relative z-10">
-                    <div class="flex items-center gap-3 mb-1">
-                        <div class="w-8 h-8 bg-white/20 backdrop-blur rounded p-1 flex items-center justify-center font-bold text-white text-xs border border-white/30">S</div>
+                    <div class="flex items-center gap-3 mb-1 relative">
+                        <button id="welcomeFlagTrigger" type="button" class="pointer-events-auto w-[2.6rem] h-8 bg-white/20 backdrop-blur rounded p-1 flex items-center justify-center border border-white/30 overflow-hidden" title="Mudar país da visita" aria-expanded="false" aria-controls="welcomeFlagMenu">
+                            <img id="welcomeFlagIcon" src="https://flagcdn.com/w40/pt.png" alt="Bandeira selecionada" class="w-full h-full object-cover rounded-sm">
+                        </button>
+                        <div id="welcomeFlagMenu" class="pointer-events-auto hidden fixed z-[9999] w-40 bg-white/95 text-slate-700 border border-slate-200 rounded-lg shadow-lg p-1 max-h-36 overflow-y-auto"></div>
                         <div>
-                            <h4 class="text-sm font-bold">Welcome</h4>
-                            <p class="text-[9px] uppercase text-blue-100">Visita Institucional</p>
+                            <h4 id="welcomeTitle" class="text-sm font-bold italic">Bem-vindos</h4>
                         </div>
                     </div>
-                    <p class="text-[10px] text-blue-50 italic leading-tight max-w-[180px]">É um privilégio receber a vossa visita nas nossas instalações.</p>
+                    <p class="text-[10px] text-blue-50 italic leading-tight max-w-[180px]"></p>
+                    <img id="visitorLogoPreview" src="https://static.wixstatic.com/media/a6967f_a067dafd8f3d42e786a750b0c3777909~mv2.png" alt="Logo do cliente" class="w-[170px] h-10 mt-1 object-contain rounded">
                 </div>
                 
                 <!-- Imagem sem margem à direita e em baixo -->
@@ -255,15 +321,15 @@
         </aside>
 
         <!-- FOOTER -->
-        <footer style="grid-area: footer" class="glass-card p-4 border-t-4 border-green-500 shrink-0">
+        <footer style="grid-area: footer" class="glass-card p-4 border-t border-green-400/60 shrink-0">
             <div class="grid grid-cols-5 gap-4 items-center">
                 <div class="flex flex-col border-l-2 border-green-500 pl-3">
                     <span class="text-[9px] text-green-600 uppercase font-bold tracking-tighter leading-none mb-1">Âmbitos 1, 2, 3</span>
-                    <span class="text-sm font-bold text-slate-800">Eco-Responsabilidade</span>
+                    <span class="text-sm font-bold text-white">Eco-Responsabilidade</span>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-[9px] text-slate-400 uppercase font-bold mb-1 leading-none">Total Emissões</span>
-                    <span class="text-sm font-bold text-slate-700">142.5 <span class="text-[9px] font-normal text-slate-400">tCO2e</span></span>
+                    <span class="text-[9px] text-white uppercase font-bold mb-1 leading-none">Total Emissões</span>
+                    <span class="text-sm font-bold text-white">142.5 <span class="text-[9px] font-normal text-white">tCO2e</span></span>
                 </div>
                 <div class="flex flex-col items-center">
                     <div class="bg-green-50 px-4 py-1.5 rounded-xl border border-green-200 text-center">
@@ -272,12 +338,12 @@
                     </div>
                 </div>
                 <div class="flex flex-col text-right">
-                    <span class="text-[9px] text-slate-400 uppercase font-bold mb-1 leading-none">Crédito Energético</span>
-                    <span class="text-sm font-bold text-blue-600">-34.2 MWh</span>
+                    <span class="text-[9px] text-white uppercase font-bold mb-1 leading-none">Crédito Energético</span>
+                    <span class="text-sm font-bold text-white">-34.2 MWh</span>
                 </div>
                 <div class="flex flex-col text-right border-r-2 border-green-500 pr-3">
-                    <span class="text-[9px] text-slate-400 uppercase font-bold mb-1 leading-none">Pegada / Equip.</span>
-                    <span class="text-sm font-bold text-slate-700">0.82 <span class="text-[9px] font-normal text-slate-400">tCO2e</span></span>
+                    <span class="text-[9px] text-white uppercase font-bold mb-1 leading-none">Pegada / Equip.</span>
+                    <span class="text-sm font-bold text-white">0.82 <span class="text-[9px] font-normal text-white">tCO2e</span></span>
                 </div>
             </div>
         </footer>
@@ -293,29 +359,346 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        const team = [
-            { name: "Carlos Ferreira", role: "P1" }, { name: "Ana Martins", role: "P2" },
-            { name: "Pedro Vale", role: "P3" }, { name: "Maria Luz", role: "Log" },
-            { name: "Jorge Cruz", role: "P4" }, { name: "Rita Gomes", role: "P5" },
-            { name: "Vasco Lima", role: "P6" }, { name: "Sofia M.", role: "P1" },
-            { name: "Luis T.", role: "P4" }, { name: "Inês R.", role: "P2" },
-            { name: "Miguel S.", role: "P3" }, { name: "Joana B.", role: "P5" },
-            { name: "Tiago F.", role: "P6" }, { name: "Helena G.", role: "QC" }
+        const STORAGE_KEY = 'daily-dashboard-state-v1';
+
+        function loadDashboardState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                return raw ? JSON.parse(raw) : {};
+            } catch {
+                return {};
+            }
+        }
+
+        const persistedState = loadDashboardState();
+
+        const welcomeFlagCodes = {
+            PORTUGAL: 'pt',
+            ESPANHA: 'es',
+            FRANÇA: 'fr',
+            ALEMANHA: 'de',
+            BRASIL: 'br',
+            USA: 'us'
+        };
+
+        const welcomeTranslations = {
+            PORTUGAL: 'Bem-vindos',
+            ESPANHA: 'Bienvenidos',
+            FRANÇA: 'Bienvenue',
+            ALEMANHA: 'Willkommen',
+            BRASIL: 'Bem-vindos',
+            USA: 'Welcome'
+        };
+
+        const welcomeCountries = ['PORTUGAL', 'ESPANHA', 'FRANÇA', 'ALEMANHA', 'BRASIL', 'USA'];
+        const welcomeCountryNames = {
+            PORTUGAL: 'Portugal',
+            ESPANHA: 'Espanha',
+            FRANÇA: 'França',
+            ALEMANHA: 'Alemanha',
+            BRASIL: 'Brasil',
+            USA: 'USA'
+        };
+
+        const teamDefaults = [
+            { name: 'Carlos Ferreira', role: 'P1' }, { name: 'Ana Martins', role: 'P2' },
+            { name: 'Pedro Vale', role: 'P3' }, { name: 'Maria Luz', role: 'Log' },
+            { name: 'Jorge Cruz', role: 'P4' }, { name: 'Rita Gomes', role: 'P5' },
+            { name: 'Vasco Lima', role: 'P6' }, { name: 'Sofia M.', role: 'P1' },
+            { name: 'Luis T.', role: 'P4' }, { name: 'Inês R.', role: 'P2' },
+            { name: 'Miguel S.', role: 'P3' }, { name: 'Joana B.', role: 'P5' },
+            { name: 'Tiago F.', role: 'P6' }, { name: 'Helena G.', role: 'QC' },
+            { name: 'Bruno A.', role: 'P2' }, { name: 'Patrícia N.', role: 'Log' }
         ];
 
+        const maxTechnicalCards = 4;
+        const technicalCountries = ['PORTUGAL', 'ESPANHA', 'FRANÇA', 'ALEMANHA', 'BRASIL', 'USA'];
+
+        const appState = {
+            welcomeCountry: welcomeCountries.includes(persistedState.welcomeCountry) ? persistedState.welcomeCountry : 'PORTUGAL',
+            team: Array.isArray(persistedState.team) && persistedState.team.length === teamDefaults.length
+                ? persistedState.team.map((member, index) => ({
+                    name: member?.name || teamDefaults[index].name,
+                    role: teamDefaults[index].role,
+                    active: typeof member?.active === 'boolean' ? member.active : true
+                }))
+                : teamDefaults.map(member => ({ ...member, active: true })),
+            technicalTeam: Array.isArray(persistedState.technicalTeam)
+                ? persistedState.technicalTeam
+                    .slice(0, maxTechnicalCards)
+                    .map(member => ({
+                        name: typeof member?.name === 'string' ? member.name : '',
+                        country: technicalCountries.includes(member?.country) ? member.country : technicalCountries[0]
+                    }))
+                : [],
+            victoriesText: typeof persistedState.victoriesText === 'string' ? persistedState.victoriesText : ''
+        };
+
+        function saveDashboardState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch {
+            }
+        }
+
+        function getWelcomeFlagUrl(country) {
+            const code = welcomeFlagCodes[country] || 'un';
+            return `https://flagcdn.com/w40/${code}.png`;
+        }
+
+        const welcomeFlagIcon = document.getElementById('welcomeFlagIcon');
+        const welcomeFlagTrigger = document.getElementById('welcomeFlagTrigger');
+        const welcomeFlagMenu = document.getElementById('welcomeFlagMenu');
+        const welcomeTitle = document.getElementById('welcomeTitle');
+        const victoriesInternalText = document.getElementById('victoriesInternalText');
+
+        document.body.appendChild(welcomeFlagMenu);
+
+        function updateWelcomeCardByCountry(country, shouldPersist = false) {
+            welcomeFlagIcon.src = getWelcomeFlagUrl(country);
+            welcomeFlagIcon.alt = `Bandeira de ${country}`;
+            welcomeFlagTrigger.title = `País da visita: ${country}`;
+            welcomeTitle.innerText = welcomeTranslations[country] || 'Welcome';
+
+            if (shouldPersist) {
+                appState.welcomeCountry = country;
+                saveDashboardState();
+            }
+        }
+
+        function renderWelcomeFlagMenu() {
+            welcomeFlagMenu.innerHTML = welcomeCountries
+                .map(country => `
+                    <button type="button" data-country="${country}" class="w-full flex items-center gap-2 px-2 py-1 rounded-md hover:bg-slate-100 text-left">
+                        <img src="${getWelcomeFlagUrl(country)}" alt="Bandeira de ${country}" class="w-4 h-3 rounded-[2px] object-cover shrink-0" />
+                        <span class="text-[10px] font-semibold">${welcomeCountryNames[country]}</span>
+                    </button>
+                `)
+                .join('');
+        }
+
+        function setWelcomeFlagMenuOpen(isOpen) {
+            if (isOpen) {
+                const triggerRect = welcomeFlagTrigger.getBoundingClientRect();
+                welcomeFlagMenu.classList.remove('hidden');
+                welcomeFlagMenu.style.display = 'block';
+
+                const menuWidth = welcomeFlagMenu.offsetWidth;
+                const menuHeight = welcomeFlagMenu.offsetHeight;
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+
+                let left = triggerRect.left;
+                let top = triggerRect.bottom + 6;
+
+                if (left + menuWidth > viewportWidth - 8) {
+                    left = Math.max(8, viewportWidth - menuWidth - 8);
+                }
+
+                if (top + menuHeight > viewportHeight - 8) {
+                    top = Math.max(8, triggerRect.top - menuHeight - 6);
+                }
+
+                welcomeFlagMenu.style.left = `${left}px`;
+                welcomeFlagMenu.style.top = `${top}px`;
+            } else {
+                welcomeFlagMenu.classList.add('hidden');
+                welcomeFlagMenu.style.display = 'none';
+            }
+
+            welcomeFlagTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+
+        renderWelcomeFlagMenu();
+        welcomeFlagMenu.style.display = 'none';
+        updateWelcomeCardByCountry(appState.welcomeCountry);
+
+        welcomeFlagTrigger.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const isOpen = welcomeFlagMenu.classList.contains('hidden');
+            setWelcomeFlagMenuOpen(isOpen);
+        });
+
+        welcomeFlagMenu.addEventListener('click', (event) => {
+            const optionButton = event.target.closest('button[data-country]');
+            if (!optionButton) return;
+
+            const selectedCountry = optionButton.dataset.country;
+            updateWelcomeCardByCountry(selectedCountry, true);
+            setWelcomeFlagMenuOpen(false);
+        });
+
+        document.addEventListener('click', (event) => {
+            if (welcomeFlagMenu.classList.contains('hidden')) return;
+            if (welcomeFlagMenu.contains(event.target) || welcomeFlagTrigger.contains(event.target)) return;
+            setWelcomeFlagMenuOpen(false);
+        });
+
+        window.addEventListener('resize', () => {
+            if (!welcomeFlagMenu.classList.contains('hidden')) {
+                setWelcomeFlagMenuOpen(true);
+            }
+        });
+
+        victoriesInternalText.innerText = appState.victoriesText;
+        victoriesInternalText.addEventListener('input', () => {
+            appState.victoriesText = victoriesInternalText.innerText;
+            saveDashboardState();
+        });
+
         const teamList = document.getElementById('teamList');
-        team.forEach(m => {
+        appState.team.forEach((member, index) => {
             const div = document.createElement('div');
-            div.className = 'flex items-center justify-between bg-white/90 p-1.5 px-2 rounded-lg border border-slate-100 shadow-sm overflow-hidden';
+            div.className = 'flex items-center justify-between bg-white/90 p-2 px-3 rounded-lg border border-slate-100 shadow-sm overflow-hidden cursor-pointer';
             div.innerHTML = `
                 <div class="flex items-center gap-1.5 overflow-hidden">
-                    <div class="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></div>
-                    <span class="text-[9px] font-bold text-slate-700 truncate">${m.name}</span>
+                    <div class="status-dot w-1.5 h-1.5 rounded-full shrink-0 ${member.active ? 'bg-green-500' : 'bg-red-500'}"></div>
+                    <span class="editable-name text-[9px] font-bold text-slate-700 truncate">${member.name}</span>
                 </div>
-                <span class="text-[8px] text-blue-600 font-bold bg-blue-50 px-1 py-0.5 rounded-full shrink-0">${m.role}</span>
+                <span class="text-[8px] text-blue-600 font-bold bg-blue-50 px-1 py-0.5 rounded-full shrink-0">${member.role}</span>
             `;
+
+            const editableName = div.querySelector('.editable-name');
+
+            div.addEventListener('click', () => {
+                if (editableName.isContentEditable) return;
+                const statusDot = div.querySelector('.status-dot');
+                appState.team[index].active = !appState.team[index].active;
+                statusDot.classList.toggle('bg-green-500', appState.team[index].active);
+                statusDot.classList.toggle('bg-red-500', !appState.team[index].active);
+                saveDashboardState();
+            });
+
+            editableName.addEventListener('dblclick', (event) => {
+                event.stopPropagation();
+                editableName.contentEditable = 'true';
+                editableName.focus();
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(editableName);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            });
+
+            editableName.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    editableName.blur();
+                }
+            });
+
+            editableName.addEventListener('blur', () => {
+                editableName.contentEditable = 'false';
+                const nextName = editableName.innerText.trim();
+                if (nextName) {
+                    appState.team[index].name = nextName;
+                }
+                editableName.innerText = appState.team[index].name;
+                saveDashboardState();
+            });
+
             teamList.appendChild(div);
         });
+
+        let technicalCardsCount = 0;
+        const technicalCountryCodes = {
+            PORTUGAL: 'pt',
+            ESPANHA: 'es',
+            FRANÇA: 'fr',
+            ALEMANHA: 'de',
+            BRASIL: 'br',
+            USA: 'us'
+        };
+        const technicalTeamList = document.getElementById('technicalTeamList');
+        const addTechnicalCardBtn = document.getElementById('addTechnicalCardBtn');
+        let highlightedTechnicalCountries = new Set();
+
+        function getFlagUrl(country) {
+            const code = technicalCountryCodes[country] || 'un';
+            return `https://flagcdn.com/w20/${code}.png`;
+        }
+
+        function updateAddTechnicalButton() {
+            const reachedLimit = technicalCardsCount >= maxTechnicalCards;
+            addTechnicalCardBtn.disabled = reachedLimit;
+            addTechnicalCardBtn.classList.toggle('opacity-50', reachedLimit);
+            addTechnicalCardBtn.classList.toggle('cursor-not-allowed', reachedLimit);
+            addTechnicalCardBtn.classList.toggle('hover:bg-blue-700', !reachedLimit);
+        }
+
+        function updateHighlightedMapPoints() {
+            highlightedTechnicalCountries = new Set(
+                [...technicalTeamList.querySelectorAll('select')].map(select => select.value)
+            );
+
+            if (worldFeatures) {
+                renderGeoMap();
+            }
+        }
+
+        function createTechnicalCard(memberState, shouldPersist = true) {
+            if (technicalCardsCount >= maxTechnicalCards) return;
+
+            const countryOptions = technicalCountries
+                .map(country => `<option value="${country}">${country}</option>`)
+                .join('');
+
+            const initialCountry = technicalCountries.includes(memberState.country) ? memberState.country : technicalCountries[0];
+
+            const card = document.createElement('div');
+            card.className = 'bg-white/90 p-2 rounded-lg border border-slate-100 shadow-sm flex flex-col gap-1';
+            card.innerHTML = `
+                <div class="flex items-center gap-1.5 min-w-0">
+                    <img class="technical-flag w-4 h-3 rounded-[2px] object-cover shrink-0" src="${getFlagUrl(initialCountry)}" alt="Bandeira de ${initialCountry}" />
+                    <input type="text" placeholder="Nome" class="flex-1 w-full min-w-0 text-[9px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded px-1.5 py-1 outline-none focus:ring-1 focus:ring-blue-400" value="${memberState.name || ''}" />
+                </div>
+                <select class="w-full text-[8px] font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none focus:ring-1 focus:ring-blue-400">
+                    ${countryOptions}
+                </select>
+            `;
+
+            const nameInput = card.querySelector('input');
+            const countrySelect = card.querySelector('select');
+            const flagElement = card.querySelector('.technical-flag');
+
+            countrySelect.value = initialCountry;
+            memberState.country = initialCountry;
+
+            nameInput.addEventListener('input', () => {
+                memberState.name = nameInput.value;
+                saveDashboardState();
+            });
+
+            countrySelect.addEventListener('change', () => {
+                memberState.country = countrySelect.value;
+                flagElement.src = getFlagUrl(countrySelect.value);
+                flagElement.alt = `Bandeira de ${countrySelect.value}`;
+                updateHighlightedMapPoints();
+                saveDashboardState();
+            });
+
+            technicalTeamList.appendChild(card);
+            technicalCardsCount += 1;
+            updateHighlightedMapPoints();
+            updateAddTechnicalButton();
+
+            if (shouldPersist) {
+                saveDashboardState();
+            }
+        }
+
+        addTechnicalCardBtn.addEventListener('click', () => {
+            if (technicalCardsCount >= maxTechnicalCards) return;
+
+            const newMember = { name: '', country: technicalCountries[0] };
+            appState.technicalTeam.push(newMember);
+            createTechnicalCard(newMember);
+        });
+
+        appState.technicalTeam.forEach(memberState => {
+            createTechnicalCard(memberState, false);
+        });
+        updateAddTechnicalButton();
 
         const planning = [
             { client: "Danone", mod: "MW-4000", post: 1, prog: 75, color: "bg-blue-500" },
@@ -475,8 +858,9 @@
                 const point = document.createElement('div');
                 const pointSize = 4.656;
                 const rippleMax = 36;
+                const isHighlighted = cluster.countries.some(country => highlightedTechnicalCountries.has(country));
 
-                point.className = 'pulse-point';
+                point.className = isHighlighted ? 'pulse-point pulse-point--highlighted' : 'pulse-point';
                 point.style.top = `${(cluster.y / height) * 100}%`;
                 point.style.left = `${(cluster.x / width) * 100}%`;
                 point.style.setProperty('--point-size', `${pointSize}px`);
