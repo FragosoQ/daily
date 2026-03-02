@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Somengil - Light Eco Dashboard with Neon Heart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body, html {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            overflow: hidden; 
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* O CORAÇÃO NEON: Mapa Escuro Deep Blue */
+        .world-map-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(circle at center, #000a1f 0%, #020617 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-svg {
+            width: 90%;
+            height: 80%;
+            opacity: 0.25;
+            filter: invert(1) hue-rotate(180deg) brightness(1.5); 
+        }
+
+        /* HUD Structure */
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+            height: 100vh;
+            display: grid;
+            grid-template-areas: 
+                "header header header"
+                "team map planning"
+                "footer footer footer";
+            grid-template-columns: 320px 1fr 340px; 
+            grid-template-rows: auto 1fr auto;
+            gap: 0.75rem;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .ui-layer > * {
+            pointer-events: auto;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Pontos Neon com Ripple */
+        .pulse-point {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #00f2ff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #00f2ff, 0 0 30px rgba(0, 242, 255, 0.5);
+        }
+
+        .pulse-point::before,
+        .pulse-point::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border: 1.5px solid #00f2ff;
+            border-radius: 50%;
+            animation: ripple 2.5s infinite ease-out;
+            opacity: 0;
+        }
+
+        .pulse-point::after {
+            animation-delay: 1.25s;
+        }
+
+        @keyframes ripple {
+            0% {
+                width: 8px;
+                height: 8px;
+                opacity: 0.8;
+            }
+            100% {
+                width: 60px;
+                height: 60px;
+                opacity: 0;
+            }
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .planning-item {
+            flex: 1 1 0;
+            min-height: 0;
+        }
+
+        /* Grid específico para Equipa Presente */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(8, minmax(0, 1fr));
+            gap: 0.35rem;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background com Mapa Neon -->
+    <div class="world-map-bg">
+        <div class="relative w-full h-full flex items-center justify-center">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" class="map-svg" alt="Mapa do Mundo">
+            
+            <div class="pulse-point" style="top: 38%; left: 47%;" title="Portugal"></div>
+            <div class="pulse-point" style="top: 33%; left: 30%;" title="USA"></div>
+            <div class="pulse-point" style="top: 48%; left: 34%;" title="Brasil"></div>
+            <div class="pulse-point" style="top: 45%; left: 77%;" title="Taiwan"></div>
+            <div class="pulse-point" style="top: 68%; left: 83%;" title="Austrália"></div>
+            <div class="pulse-point" style="top: 35%; left: 54%;" title="Alemanha"></div>
+            <div class="pulse-point" style="top: 55%; left: 75%;" title="Tailândia"></div>
+        </div>
+    </div>
+
+    <!-- Interface HUD -->
+    <div class="ui-layer">
+        
+        <!-- HEADER -->
+        <header style="grid-area: header" class="flex justify-between items-center glass-card shrink-0 relative h-20 overflow-hidden">
+            <div class="absolute top-0 left-0 p-3">
+                <img src="https://static.wixstatic.com/media/a6967f_eee0d017524f4a48bf2870cc2385c10b~mv2.png" 
+                     alt="Somengil Logótipo" 
+                     class="h-10 w-auto object-contain">
+            </div>
+
+            <div class="flex-1"></div>
+
+            <div class="flex flex-col items-end gap-1 px-8 py-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-[11px] text-slate-400 uppercase font-bold tracking-tight">Sem Acidentes</span>
+                    <span class="text-2xl font-black text-green-600 leading-none">428 Dias</span>
+                    <div class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.7)]"></div>
+                </div>
+                
+                <div class="flex items-center gap-3 text-right">
+                    <div class="text-[9px] text-slate-400 uppercase tracking-widest font-semibold" id="date">...</div>
+                    <div class="w-px h-3 bg-slate-300"></div>
+                    <div class="text-sm font-mono font-bold text-slate-700 leading-none" id="clock">00:00:00</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- LEFT: TEAM -->
+        <aside style="grid-area: team" class="flex flex-col gap-3 overflow-hidden">
+            <div class="glass-card p-4 flex-1 border-l-4 border-l-blue-600">
+                <h3 class="text-[11px] font-bold uppercase text-slate-500 tracking-widest border-b border-slate-200 pb-3 mb-3 shrink-0">
+                    Equipa Presente
+                </h3>
+                <div class="team-grid overflow-hidden" id="teamList">
+                    <!-- Gerado via JavaScript -->
+                </div>
+            </div>
+
+            <div class="glass-card p-4 h-28 shrink-0 bg-white/90">
+                <h3 class="text-[11px] font-bold uppercase text-amber-600 tracking-widest mb-1 shrink-0">
+                    🏆 Vitórias Internas
+                </h3>
+                <p class="text-[10px] text-slate-600 leading-tight bg-amber-50 p-2 rounded-xl border border-amber-200">
+                    "Novo recorde de eficiência na montagem! Parabéns à equipa."
+                </p>
+            </div>
+        </aside>
+
+        <!-- RIGHT: PLANNING -->
+        <aside style="grid-area: planning" class="flex flex-col gap-3 overflow-hidden">
+            <div class="glass-card p-4 flex-1 border-r-4 border-r-blue-700">
+                <h3 class="text-[11px] font-bold uppercase text-slate-500 tracking-widest border-b border-slate-200 pb-2 mb-2 shrink-0">
+                    Linha de Produção
+                </h3>
+                <div class="flex flex-col gap-2 h-full justify-between overflow-hidden" id="planningList">
+                    <!-- Gerado via JavaScript -->
+                </div>
+            </div>
+
+            <!-- WELCOME CARD SEM MARGEM À DIREITA E EM BAIXO -->
+            <div id="welcomeCard" class="glass-card p-4 bg-gradient-to-br from-blue-600 to-indigo-800 text-white shrink-0 h-28 shadow-xl relative overflow-hidden">
+                <div class="flex flex-col h-full relative z-10">
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="w-8 h-8 bg-white/20 backdrop-blur rounded p-1 flex items-center justify-center font-bold text-white text-xs border border-white/30">S</div>
+                        <div>
+                            <h4 class="text-sm font-bold">Welcome</h4>
+                            <p class="text-[9px] uppercase text-blue-100">Visita Institucional</p>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-blue-50 italic leading-tight max-w-[180px]">É um privilégio receber a vossa visita nas nossas instalações.</p>
+                </div>
+                
+                <!-- Imagem sem margem à direita e em baixo -->
+                <div class="absolute bottom-0 right-0 opacity-90 h-full flex items-end">
+                    <img src="https://static.wixstatic.com/media/a6967f_57a8d2b6c06a4b819541a54cab7694f4~mv2.png" 
+                         alt="Somengil Ícone" 
+                         class="h-24 w-auto object-contain">
+                </div>
+            </div>
+        </aside>
+
+        <!-- FOOTER -->
+        <footer style="grid-area: footer" class="glass-card p-4 border-t-4 border-green-500 shrink-0">
+            <div class="grid grid-cols-5 gap-4 items-center">
+                <div class="flex flex-col border-l-2 border-green-500 pl-3">
+                    <span class="text-[9px] text-green-600 uppercase font-bold tracking-tighter leading-none mb-1">Âmbitos 1, 2, 3</span>
+                    <span class="text-sm font-bold text-slate-800">Eco-Responsabilidade</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[9px] text-slate-400 uppercase font-bold mb-1 leading-none">Total Emissões</span>
+                    <span class="text-sm font-bold text-slate-700">142.5 <span class="text-[9px] font-normal text-slate-400">tCO2e</span></span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="bg-green-50 px-4 py-1.5 rounded-xl border border-green-200 text-center">
+                        <span class="text-[9px] text-green-700 uppercase block font-bold leading-none">Pegada Líquida</span>
+                        <span class="text-xl font-black text-green-600 leading-none">108.3</span>
+                    </div>
+                </div>
+                <div class="flex flex-col text-right">
+                    <span class="text-[9px] text-slate-400 uppercase font-bold mb-1 leading-none">Crédito Energético</span>
+                    <span class="text-sm font-bold text-blue-600">-34.2 MWh</span>
+                </div>
+                <div class="flex flex-col text-right border-r-2 border-green-500 pr-3">
+                    <span class="text-[9px] text-slate-400 uppercase font-bold mb-1 leading-none">Pegada / Equip.</span>
+                    <span class="text-sm font-bold text-slate-700">0.82 <span class="text-[9px] font-normal text-slate-400">tCO2e</span></span>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('pt-PT');
+            document.getElementById('date').innerText = now.toLocaleDateString('pt-PT', { weekday: 'long', day: '2-digit', month: 'long' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        const team = [
+            { name: "Carlos Ferreira", role: "P1" }, { name: "Ana Martins", role: "P2" },
+            { name: "Pedro Vale", role: "P3" }, { name: "Maria Luz", role: "Log" },
+            { name: "Jorge Cruz", role: "P4" }, { name: "Rita Gomes", role: "P5" },
+            { name: "Vasco Lima", role: "P6" }, { name: "Sofia M.", role: "P1" },
+            { name: "Luis T.", role: "P4" }, { name: "Inês R.", role: "P2" },
+            { name: "Miguel S.", role: "P3" }, { name: "Joana B.", role: "P5" },
+            { name: "Tiago F.", role: "P6" }, { name: "Helena G.", role: "QC" }
+        ];
+
+        const teamList = document.getElementById('teamList');
+        team.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between bg-white/90 p-1.5 px-2 rounded-lg border border-slate-100 shadow-sm overflow-hidden';
+            div.innerHTML = `
+                <div class="flex items-center gap-1.5 overflow-hidden">
+                    <div class="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></div>
+                    <span class="text-[9px] font-bold text-slate-700 truncate">${m.name}</span>
+                </div>
+                <span class="text-[8px] text-blue-600 font-bold bg-blue-50 px-1 py-0.5 rounded-full shrink-0">${m.role}</span>
+            `;
+            teamList.appendChild(div);
+        });
+
+        const planning = [
+            { client: "Danone", mod: "MW-4000", post: 1, prog: 75, color: "bg-blue-500" },
+            { client: "Nestlé", mod: "MW-2000", post: 2, prog: 12, color: "bg-blue-300" },
+            { client: "Bimbo", mod: "Custom XL", post: 3, prog: 92, color: "bg-green-500" },
+            { client: "Pestana", mod: "MW-Compact", post: 4, prog: 45, color: "bg-indigo-400" },
+            { client: "Heineken", mod: "MW-Industrial", post: 5, prog: 60, color: "bg-sky-500" },
+            { client: "Lactogal", mod: "MW-4000", post: 6, prog: 28, color: "bg-slate-400" }
+        ];
+
+        const planningList = document.getElementById('planningList');
+        planning.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'planning-item flex flex-col justify-center bg-white/90 p-2 rounded-xl border border-slate-100 shadow-sm';
+            div.innerHTML = `
+                <div class="flex justify-between items-center leading-none mb-1">
+                    <span class="text-[10px] font-bold text-slate-800 uppercase truncate">${item.client}</span>
+                    <span class="text-[8px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-bold">P${item.post}</span>
+                </div>
+                <div class="flex justify-between text-[9px] text-slate-500 mb-1 leading-none">
+                    <span class="truncate">${item.mod}</span>
+                    <span class="font-bold text-slate-700">${item.prog}%</span>
+                </div>
+                <div class="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full ${item.color} rounded-full" style="width: ${item.prog}%"></div>
+                </div>
+            `;
+            planningList.appendChild(div);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if(e.key.toLowerCase() === 'h') {
+                const card = document.getElementById('welcomeCard');
+                card.classList.toggle('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
