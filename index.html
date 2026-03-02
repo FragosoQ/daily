@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Somengil - Light Eco Dashboard with Neon Heart</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         
         body, html {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
+            background: radial-gradient(circle at center, #0c68f3 0%, #f1f2f5 100%);
             color: #1e293b;
             overflow: hidden; 
             height: 100vh;
@@ -27,17 +29,38 @@
             width: 100%;
             height: 100%;
             z-index: 0;
-            background: radial-gradient(circle at center, #000a1f 0%, #020617 100%);
+            background: radial-gradient(circle at center, #2d2d2e 0%,#1d1f23 70%, #020617 100%);
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .map-svg {
-            width: 90%;
-            height: 80%;
-            opacity: 0.25;
-            filter: invert(1) hue-rotate(180deg) brightness(1.5); 
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.78;
+        }
+
+        .map-country {
+            fill: #626262;
+            stroke: #000000;
+            stroke-width: 0.7;
+        }
+
+        .map-stage {
+            position: relative;
+            width: min(90vw, 1531px);
+            aspect-ratio: 2 / 1;
+            max-height: 72vh;
+            transform: translate(-5%, 26%) scale(1.5);
+            transform-origin: center center;
+        }
+
+        #mapPoints {
+            position: absolute;
+            inset: 0;
         }
 
         /* HUD Structure */
@@ -63,11 +86,11 @@
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.18);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.22);
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -76,8 +99,9 @@
         /* Pontos Neon com Ripple */
         .pulse-point {
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: var(--point-size, 4.656px);
+            height: var(--point-size, 4.656px);
+            transform: translate(-50%, -50%);
             background: #00f2ff;
             border-radius: 50%;
             box-shadow: 0 0 15px #00f2ff, 0 0 30px rgba(0, 242, 255, 0.5);
@@ -90,8 +114,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 8px;
-            height: 8px;
+            width: var(--point-size, 4.656px);
+            height: var(--point-size, 4.656px);
             border: 1.5px solid #00f2ff;
             border-radius: 50%;
             animation: ripple 2.5s infinite ease-out;
@@ -104,13 +128,13 @@
 
         @keyframes ripple {
             0% {
-                width: 8px;
-                height: 8px;
+                width: var(--point-size, 4.656px);
+                height: var(--point-size, 4.656px);
                 opacity: 0.8;
             }
             100% {
-                width: 60px;
-                height: 60px;
+                width: var(--ripple-max, 36px);
+                height: var(--ripple-max, 36px);
                 opacity: 0;
             }
         }
@@ -137,16 +161,10 @@
 
     <!-- Background com Mapa Neon -->
     <div class="world-map-bg">
-        <div class="relative w-full h-full flex items-center justify-center">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" class="map-svg" alt="Mapa do Mundo">
-            
-            <div class="pulse-point" style="top: 38%; left: 47%;" title="Portugal"></div>
-            <div class="pulse-point" style="top: 33%; left: 30%;" title="USA"></div>
-            <div class="pulse-point" style="top: 48%; left: 34%;" title="Brasil"></div>
-            <div class="pulse-point" style="top: 45%; left: 77%;" title="Taiwan"></div>
-            <div class="pulse-point" style="top: 68%; left: 83%;" title="Austrália"></div>
-            <div class="pulse-point" style="top: 35%; left: 54%;" title="Alemanha"></div>
-            <div class="pulse-point" style="top: 55%; left: 75%;" title="Tailândia"></div>
+        <div class="map-stage">
+            <svg id="worldMapSvg" class="map-svg" aria-label="Mapa do Mundo"></svg>
+
+            <div id="mapPoints"></div>
         </div>
     </div>
 
@@ -156,25 +174,23 @@
         <!-- HEADER -->
         <header style="grid-area: header" class="flex justify-between items-center glass-card shrink-0 relative h-20 overflow-hidden">
             <div class="absolute top-0 left-0 p-3">
-                <img src="https://static.wixstatic.com/media/a6967f_eee0d017524f4a48bf2870cc2385c10b~mv2.png" 
+                 <img src="https://static.wixstatic.com/media/a6967f_982db5e228854134b613cf1ffab4708d~mv2.png" 
                      alt="Somengil Logótipo" 
-                     class="h-10 w-auto object-contain">
+                     class="w-auto object-contain"
+                     style="height: 53.33px;">
             </div>
 
-            <div class="flex-1"></div>
-
-            <div class="flex flex-col items-end gap-1 px-8 py-4">
+            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center leading-none">
                 <div class="flex items-center gap-2">
-                    <span class="text-[11px] text-slate-400 uppercase font-bold tracking-tight">Sem Acidentes</span>
-                    <span class="text-2xl font-black text-green-600 leading-none">428 Dias</span>
+                    <span class="text-2xl font-black text-green-600">428 Dias</span>
                     <div class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.7)]"></div>
                 </div>
-                
-                <div class="flex items-center gap-3 text-right">
-                    <div class="text-[9px] text-slate-400 uppercase tracking-widest font-semibold" id="date">...</div>
-                    <div class="w-px h-3 bg-slate-300"></div>
-                    <div class="text-sm font-mono font-bold text-slate-700 leading-none" id="clock">00:00:00</div>
-                </div>
+                <span class="text-[11px] text-slate-400 uppercase font-bold tracking-tight mt-1">Sem Acidentes</span>
+            </div>
+
+            <div class="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col items-end gap-1 text-right">
+                <div class="text-[9px] text-slate-400 uppercase tracking-widest font-semibold" id="date">...</div>
+                <div class="text-sm font-mono font-bold text-white leading-none" id="clock">00:00:00</div>
             </div>
         </header>
 
@@ -330,6 +346,155 @@
                 card.classList.toggle('hidden');
             }
         });
+
+        const countriesWithCoords = [
+            { name: "ALEMANHA", lat: 52.52, lon: 13.405 },
+            { name: "ARGENTINA", lat: -34.6037, lon: -58.3816 },
+            { name: "AUSTRÁLIA", lat: -35.2809, lon: 149.13 },
+            { name: "ÁUSTRIA", lat: 48.2082, lon: 16.3738 },
+            { name: "BÉLGICA", lat: 50.8503, lon: 4.3517 },
+            { name: "BIELORÚSSIA", lat: 53.9, lon: 27.5667 },
+            { name: "BRASIL", lat: -15.7939, lon: -47.8828 },
+            { name: "BULGÁRIA", lat: 42.6977, lon: 23.3219 },
+            { name: "CANADÁ", lat: 45.4215, lon: -75.6972 },
+            { name: "CHÉQUIA", lat: 50.0755, lon: 14.4378 },
+            { name: "CHILE", lat: -33.4489, lon: -70.6693 },
+            { name: "CHIPRE", lat: 35.1856, lon: 33.3823 },
+            { name: "COLÔMBIA", lat: 4.711, lon: -74.0721 },
+            { name: "CROÁCIA", lat: 45.815, lon: 15.9819 },
+            { name: "DINAMARCA", lat: 55.6761, lon: 12.5683 },
+            { name: "DUBAI", lat: 25.2048, lon: 55.2708 },
+            { name: "EGIPTO", lat: 30.0444, lon: 31.2357 },
+            { name: "EL SALVADOR", lat: 13.6929, lon: -89.2182 },
+            { name: "ESLOVÁQUIA", lat: 48.1486, lon: 17.1077 },
+            { name: "ESPANHA", lat: 40.4168, lon: -3.7038 },
+            { name: "FILIPINAS", lat: 14.5995, lon: 120.9842 },
+            { name: "FINLÂNDIA", lat: 60.1699, lon: 24.9384 },
+            { name: "FRANÇA", lat: 48.8566, lon: 2.3522 },
+            { name: "GRÉCIA", lat: 37.9838, lon: 23.7275 },
+            { name: "GUATEMALA", lat: 14.6349, lon: -90.5069 },
+            { name: "HONDURAS", lat: 14.0723, lon: -87.1921 },
+            { name: "HONG KONG", lat: 22.3193, lon: 114.1694 },
+            { name: "HUNGRIA", lat: 47.4979, lon: 19.0402 },
+            { name: "INDONÉSIA", lat: -6.2088, lon: 106.8456 },
+            { name: "ISRAEL", lat: 32.0853, lon: 34.7818 },
+            { name: "ITÁLIA", lat: 41.9028, lon: 12.4964 },
+            { name: "LITUÂNIA", lat: 54.6872, lon: 25.2797 },
+            { name: "MÉXICO", lat: 19.4326, lon: -99.1332 },
+            { name: "MONGÓLIA", lat: 47.8864, lon: 106.9057 },
+            { name: "NORUEGA", lat: 59.9139, lon: 10.7522 },
+            { name: "PAISES BAIXOS", lat: 52.3676, lon: 4.9041 },
+            { name: "PANAMA", lat: 8.9824, lon: -79.5199 },
+            { name: "POLÓNIA", lat: 52.2297, lon: 21.0122 },
+            { name: "PORTUGAL", lat: 38.7223, lon: -9.1393 },
+            { name: "QATAR", lat: 25.2854, lon: 51.531 },
+            { name: "REP. CHECA", lat: 50.0755, lon: 14.4378 },
+            { name: "REP. DOMINICANA", lat: 18.4861, lon: -69.9312 },
+            { name: "ROMÉNIA", lat: 44.4268, lon: 26.1025 },
+            { name: "RÚSSIA", lat: 55.7558, lon: 37.6173 },
+            { name: "SAUDI ARABIA", lat: 24.7136, lon: 46.6753 },
+            { name: "SINGAPURA", lat: 1.3521, lon: 103.8198 },
+            { name: "SUÉCIA", lat: 59.3293, lon: 18.0686 },
+            { name: "SUIÇA", lat: 46.948, lon: 7.4474 },
+            { name: "TAILÂNDIA", lat: 13.7563, lon: 100.5018 },
+            { name: "TAIWAN", lat: 25.033, lon: 121.5654 },
+            { name: "UK", lat: 51.5074, lon: -0.1278 },
+            { name: "USA", lat: 38.9072, lon: -77.0369 },
+            { name: "UZBEQUISTÃO", lat: 41.2995, lon: 69.2401 }
+        ];
+
+        const mapStage = document.querySelector('.map-stage');
+        const mapPoints = document.getElementById('mapPoints');
+        const worldMapSvg = document.getElementById('worldMapSvg');
+        const mapSvgSelection = d3.select(worldMapSvg);
+        let worldFeatures = null;
+
+        function clusterByDistance(points, thresholdPx) {
+            const clusters = [];
+            points.forEach(point => {
+                const nearest = clusters.find(cluster => {
+                    const dx = cluster.x - point.x;
+                    const dy = cluster.y - point.y;
+                    return Math.sqrt(dx * dx + dy * dy) <= thresholdPx;
+                });
+
+                if (!nearest) {
+                    clusters.push({ x: point.x, y: point.y, countries: [point.name], count: 1 });
+                    return;
+                }
+
+                const nextCount = nearest.count + 1;
+                nearest.x = (nearest.x * nearest.count + point.x) / nextCount;
+                nearest.y = (nearest.y * nearest.count + point.y) / nextCount;
+                nearest.countries.push(point.name);
+                nearest.count = nextCount;
+            });
+            return clusters;
+        }
+
+        function renderGeoMap() {
+            if (!worldFeatures) return;
+
+            const width = mapStage.clientWidth;
+            const height = mapStage.clientHeight;
+            worldMapSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+            const projection = d3.geoMercator().fitSize([width, height], worldFeatures);
+            const path = d3.geoPath(projection);
+
+            mapSvgSelection
+                .selectAll('path')
+                .data(worldFeatures.features)
+                .join('path')
+                .attr('class', 'map-country')
+                .attr('d', path);
+
+            const projectedPoints = countriesWithCoords
+                .map(country => {
+                    const projected = projection([country.lon, country.lat]);
+                    if (!projected) return null;
+                    return { ...country, x: projected[0], y: projected[1] };
+                })
+                .filter(Boolean);
+
+            const clusters = projectedPoints.map(point => ({
+                x: point.x,
+                y: point.y,
+                countries: [point.name],
+                count: 1
+            }));
+            mapPoints.innerHTML = '';
+
+            clusters.forEach(cluster => {
+                const point = document.createElement('div');
+                const pointSize = 4.656;
+                const rippleMax = 36;
+
+                point.className = 'pulse-point';
+                point.style.top = `${(cluster.y / height) * 100}%`;
+                point.style.left = `${(cluster.x / width) * 100}%`;
+                point.style.setProperty('--point-size', `${pointSize}px`);
+                point.style.setProperty('--ripple-max', `${rippleMax}px`);
+                point.title = cluster.count > 1
+                    ? `${cluster.count} países: ${cluster.countries.join(', ')}`
+                    : cluster.countries[0];
+                mapPoints.appendChild(point);
+            });
+        }
+
+        async function initGeoMap() {
+            const topoJsonData = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(res => res.json());
+            worldFeatures = topojson.feature(topoJsonData, topoJsonData.objects.countries);
+            renderGeoMap();
+        }
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(renderGeoMap, 120);
+        });
+
+        initGeoMap();
     </script>
 </body>
 </html>
