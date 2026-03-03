@@ -1148,14 +1148,14 @@
                 div.innerHTML = `
                 <div class="planning-text-outline">
                 <div class="flex justify-between items-center leading-none mb-1">
-                    <span class="text-[12px] font-bold text-slate-800 uppercase truncate">${title}</span>
-                    ${showPostLabel ? `<span class="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-bold">${postLabel}</span>` : ''}
+                    <span class="text-[17px] font-bold text-slate-800 uppercase truncate">${title}</span>
+                    ${showPostLabel ? `<span class="text-[15px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-bold">${postLabel}</span>` : ''}
                 </div>
-                <div class="flex justify-between text-[11px] text-slate-500 mb-1 leading-none">
+                <div class="flex justify-between text-[16px] text-slate-500 mb-1 leading-none">
                     <span class="truncate">${item.lot || '-'}</span>
                     <span class="font-bold text-slate-700">${Math.round(evo)}%</span>
                 </div>
-                ${item.quantity ? `<div class="text-[10px] text-slate-600 mb-1 leading-none truncate">QTD/Lote: ${item.quantity}</div>` : ''}
+                ${item.quantity ? `<div class="text-[15px] text-slate-600 mb-1 leading-none truncate">QTD/Lote: ${item.quantity}</div>` : ''}
                 </div>
             `;
                 planningList.appendChild(div);
