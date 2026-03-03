@@ -717,34 +717,190 @@
         });
         updateAddTechnicalButton();
 
-        const planning = [
-            { client: "Danone", mod: "MW-4000", post: 1, prog: 75, color: "bg-blue-500" },
-            { client: "Nestlé", mod: "MW-2000", post: 2, prog: 12, color: "bg-blue-300" },
-            { client: "Bimbo", mod: "Custom XL", post: 3, prog: 92, color: "bg-green-500" },
-            { client: "Pestana", mod: "MW-Compact", post: 4, prog: 45, color: "bg-indigo-400" },
-            { client: "Heineken", mod: "MW-Industrial", post: 5, prog: 60, color: "bg-sky-500" },
-            { client: "Lactogal", mod: "MW-4000", post: 6, prog: 28, color: "bg-slate-400" }
-        ];
-
         const planningList = document.getElementById('planningList');
-        planning.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'planning-item flex flex-col justify-center bg-white/90 p-2 rounded-xl border border-slate-100 shadow-sm';
-            div.innerHTML = `
+        const planningFallback = [
+            { country: 'Portugal', lot: 'MW-4000', post: 1, evo: 75 },
+            { country: 'Espanha', lot: 'MW-2000', post: 2, evo: 12 },
+            { country: 'França', lot: 'Custom XL', post: 3, evo: 92 },
+            { country: 'Alemanha', lot: 'MW-Compact', post: 4, evo: 45 },
+            { country: 'Brasil', lot: 'MW-Industrial', post: 5, evo: 60 },
+            { country: 'USA', lot: 'MW-4000', post: 6, evo: 28 }
+        ];
+        const weldingFallback = [
+            { section: 'Soldadura', lot: 'S-100', post: 1, evo: 40 },
+            { section: 'Soldadura', lot: 'S-200', post: 2, evo: 55 },
+            { section: 'Soldadura', lot: 'S-300', post: 3, evo: 70 },
+            { section: 'Soldadura', lot: 'S-400', post: 4, evo: 82 },
+            { section: 'Soldadura', lot: 'S-500', post: 5, evo: 91 }
+        ];
+        const planningSheetCsvUrl = 'https://docs.google.com/spreadsheets/d/1rp5XAQQyCb6cXIGSG5JaLmhdNdoc81-S9WaqM3owh6s/gviz/tq?tqx=out:csv';
+        const weldingSheetCsvUrl = 'https://docs.google.com/spreadsheets/d/1rp5XAQQyCb6cXIGSG5JaLmhdNdoc81-S9WaqM3owh6s/gviz/tq?tqx=out:csv&sheet=soldadura';
+        const maxPlanningRows = 6;
+        const maxWeldingRows = 5;
+
+        function parseCsv(text) {
+            const rows = [];
+            let row = [];
+            let value = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i += 1) {
+                const char = text[i];
+                const nextChar = text[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        value += '"';
+                        i += 1;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                    continue;
+                }
+
+                if (char === ',' && !inQuotes) {
+                    row.push(value);
+                    value = '';
+                    continue;
+                }
+
+                if ((char === '\n' || char === '\r') && !inQuotes) {
+                    if (char === '\r' && nextChar === '\n') i += 1;
+                    row.push(value);
+                    value = '';
+                    if (row.some(cell => cell.trim() !== '')) {
+                        rows.push(row);
+                    }
+                    row = [];
+                    continue;
+                }
+
+                value += char;
+            }
+
+            if (value !== '' || row.length > 0) {
+                row.push(value);
+                if (row.some(cell => cell.trim() !== '')) {
+                    rows.push(row);
+                }
+            }
+
+            return rows;
+        }
+
+        function getPlanningColor(evoValue) {
+            if (evoValue >= 85) return 'bg-green-500';
+            if (evoValue >= 60) return 'bg-blue-500';
+            if (evoValue >= 35) return 'bg-sky-500';
+            return 'bg-slate-400';
+        }
+
+        function parseEvo(value) {
+            const normalized = String(value || '')
+                .replace('%', '')
+                .replace(',', '.')
+                .replace(/[^0-9.-]/g, '');
+            const parsed = Number.parseFloat(normalized);
+            if (Number.isNaN(parsed)) return 0;
+            return Math.max(0, Math.min(100, parsed));
+        }
+
+        function normalizePost(postValue) {
+            const raw = String(postValue || '').trim();
+            if (!raw) return '-';
+            const digits = raw.match(/\d+/);
+            return digits ? digits[0] : raw;
+        }
+
+        function renderPlanningCards(items, postPrefix, showAvailability = false) {
+            items.forEach(item => {
+                const evo = parseEvo(item.evo);
+                const color = getPlanningColor(evo);
+                const title = item.country || item.section || '-';
+                const postLabel = `${postPrefix}${normalizePost(item.post)}`;
+                const hasLot = Boolean((item.lot || '').trim());
+                const cardToneClass = showAvailability && !hasLot
+                    ? 'bg-green-50/90 border-green-200'
+                    : 'bg-white/90 border-slate-100';
+
+                const div = document.createElement('div');
+                div.className = `planning-item flex flex-col justify-center ${cardToneClass} p-2 rounded-xl border shadow-sm`;
+                div.innerHTML = `
                 <div class="flex justify-between items-center leading-none mb-1">
-                    <span class="text-[10px] font-bold text-slate-800 uppercase truncate">${item.client}</span>
-                    <span class="text-[8px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-bold">P${item.post}</span>
+                    <span class="text-[10px] font-bold text-slate-800 uppercase truncate">${title}</span>
+                    <span class="text-[8px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-bold">${postLabel}</span>
                 </div>
                 <div class="flex justify-between text-[9px] text-slate-500 mb-1 leading-none">
-                    <span class="truncate">${item.mod}</span>
-                    <span class="font-bold text-slate-700">${item.prog}%</span>
+                    <span class="truncate">${item.lot || '-'}</span>
+                    <span class="font-bold text-slate-700">${Math.round(evo)}%</span>
                 </div>
+                ${item.quantity ? `<div class="text-[8px] text-slate-600 mb-1 leading-none truncate">QTD/Lote: ${item.quantity}</div>` : ''}
                 <div class="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div class="h-full ${item.color} rounded-full" style="width: ${item.prog}%"></div>
+                    <div class="h-full ${color} rounded-full" style="width: ${evo}%"></div>
                 </div>
             `;
-            planningList.appendChild(div);
-        });
+                planningList.appendChild(div);
+            });
+        }
+
+        function renderPlanning(mainItems, weldingItems) {
+            planningList.innerHTML = '';
+            renderPlanningCards(mainItems, 'PM', true);
+
+            if (weldingItems.length) {
+                const separator = document.createElement('div');
+                separator.className = 'w-full h-px bg-white/50 my-0.5 shrink-0';
+                separator.setAttribute('aria-hidden', 'true');
+                planningList.appendChild(separator);
+                renderPlanningCards(weldingItems, 'PS');
+            }
+        }
+
+        async function loadPlanningFromSheet() {
+            try {
+                const [planningResponse, weldingResponse] = await Promise.all([
+                    fetch(planningSheetCsvUrl, { cache: 'no-store' }),
+                    fetch(weldingSheetCsvUrl, { cache: 'no-store' })
+                ]);
+
+                if (!planningResponse.ok && !weldingResponse.ok) {
+                    throw new Error(`HTTP ${planningResponse.status}/${weldingResponse.status}`);
+                }
+
+                const planningRows = planningResponse.ok ? parseCsv(await planningResponse.text()).slice(1) : [];
+                const weldingRows = weldingResponse.ok ? parseCsv(await weldingResponse.text()).slice(1) : [];
+
+                const mappedPlanningRows = planningRows
+                    .map(columns => ({
+                        post: (columns[0] || '').trim(),
+                        country: (columns[8] || '').trim(),
+                        lot: (columns[11] || '').trim(),
+                        evo: (columns[22] || '').trim()
+                    }))
+                    .filter(item => item.post || item.country || item.lot || item.evo)
+                    .slice(0, maxPlanningRows);
+
+                const mappedWeldingRows = weldingRows
+                    .map(columns => ({
+                        post: (columns[0] || '').trim(),
+                        lot: (columns[1] || '').trim(),
+                        quantity: (columns[2] || '').trim(),
+                        evo: (columns[19] || '').trim(),
+                        section: 'Soldadura'
+                    }))
+                    .filter(item => item.lot !== '')
+                    .slice(0, maxWeldingRows);
+
+                renderPlanning(
+                    mappedPlanningRows.length ? mappedPlanningRows : planningFallback,
+                    mappedWeldingRows.length ? mappedWeldingRows : weldingFallback
+                );
+            } catch (error) {
+                renderPlanning(planningFallback, weldingFallback);
+            }
+        }
+
+        loadPlanningFromSheet();
 
         document.addEventListener('keydown', (e) => {
             if(e.key.toLowerCase() === 'h') {
