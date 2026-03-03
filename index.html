@@ -326,7 +326,7 @@
         <footer style="grid-area: footer; background-image: url('https://static.wixstatic.com/media/a6967f_eb6653c0c9724e4fb7782135446f522b~mv2.png'); background-size: cover; background-position: center; background-repeat: no-repeat;" class="glass-card p-4 border-t border-green-400/60 shrink-0">
             <div class="grid grid-cols-5 gap-4 items-center">
                 <div class="flex flex-col border-l-2 border-green-500 pl-3">
-                    <span class="text-[9px] text-green-600 uppercase font-bold tracking-tighter leading-none mb-1">Âmbitos 1, 2, 3</span>
+                    <span class="text-[9px] text-white uppercase font-bold tracking-tighter leading-none mb-1">Âmbitos 1, 2, 3</span>
                     <span class="text-sm font-bold text-white">Eco-Responsabilidade</span>
                 </div>
                 <div class="flex flex-col">
@@ -651,9 +651,10 @@
             const card = document.createElement('div');
             card.className = 'bg-white/90 p-2 rounded-lg border border-slate-100 shadow-sm flex flex-col gap-1';
             card.innerHTML = `
-                <div class="flex items-center gap-1.5 min-w-0">
-                    <img class="technical-flag w-4 h-3 rounded-[2px] object-cover shrink-0" src="${getFlagUrl(initialCountry)}" alt="Bandeira de ${initialCountry}" />
+                <div class="flex items-start gap-1.5 min-w-0">
+                    <img class="technical-flag w-4 h-3 rounded-[2px] object-cover shrink-0 mt-1" src="${getFlagUrl(initialCountry)}" alt="Bandeira de ${initialCountry}" />
                     <input type="text" placeholder="Nome" class="flex-1 w-full min-w-0 text-[9px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded px-1.5 py-1 outline-none focus:ring-1 focus:ring-blue-400" value="${memberState.name || ''}" />
+                    <button type="button" class="technical-card-close shrink-0 w-4 h-4 rounded-full bg-slate-200/80 text-slate-600 text-[10px] leading-none flex items-center justify-center hover:bg-slate-300" aria-label="Remover cartão técnico" title="Remover">×</button>
                 </div>
                 <select class="w-full text-[8px] font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none focus:ring-1 focus:ring-blue-400">
                     ${countryOptions}
@@ -663,6 +664,7 @@
             const nameInput = card.querySelector('input');
             const countrySelect = card.querySelector('select');
             const flagElement = card.querySelector('.technical-flag');
+            const closeButton = card.querySelector('.technical-card-close');
 
             countrySelect.value = initialCountry;
             memberState.country = initialCountry;
@@ -677,6 +679,18 @@
                 flagElement.src = getFlagUrl(countrySelect.value);
                 flagElement.alt = `Bandeira de ${countrySelect.value}`;
                 updateHighlightedMapPoints();
+                saveDashboardState();
+            });
+
+            closeButton.addEventListener('click', () => {
+                card.remove();
+                technicalCardsCount = Math.max(technicalCardsCount - 1, 0);
+                const memberIndex = appState.technicalTeam.indexOf(memberState);
+                if (memberIndex > -1) {
+                    appState.technicalTeam.splice(memberIndex, 1);
+                }
+                updateHighlightedMapPoints();
+                updateAddTechnicalButton();
                 saveDashboardState();
             });
 
