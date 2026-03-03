@@ -237,6 +237,56 @@
             height: 80%;
             align-self: start;
         }
+
+        .refresh-pie-widget {
+            position: absolute;
+            top: 0.75rem;
+            left: calc(-1.2rem - 40px);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .planning-card-with-external-timer {
+            overflow: visible;
+        }
+
+        .refresh-pie-svg {
+            width: 48px;
+            height: 48px;
+            transform: rotate(-90deg);
+        }
+
+        .refresh-pie-track {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.28);
+            stroke-width: 4;
+        }
+
+        .refresh-pie-progress {
+            fill: none;
+            stroke: #22c55e;
+            stroke-width: 4;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s linear, stroke 0.4s ease;
+        }
+
+        .refresh-pie-label {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+            letter-spacing: 0.01em;
+        }
     </style>
 </head>
 <body>
@@ -311,12 +361,12 @@
                 </div>
             </div>
 
-            <div class="glass-card p-4 shrink-0" style="height: 15.75rem; background-image: url('https://static.wixstatic.com/media/a6967f_7bda25c185b24581b7679ed0dedb904e~mv2.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+            <div class="glass-card p-4 shrink-0" style="height: 15.75rem;">
                 <h3 class="text-[11px] font-bold uppercase text-amber-600 tracking-widest mb-1 shrink-0">
                     🏆 Vitórias Internas
                 </h3>
                 <div class="grid grid-cols-1 gap-2 mt-1 mb-1 h-full" style="grid-template-rows: 1.5fr 1fr;">
-                    <div class="min-h-0 overflow-hidden flex items-center justify-center rounded-md shadow-sm border-0" style="background-image: url('https://static.wixstatic.com/media/a6967f_eb6653c0c9724e4fb7782135446f522b~mv2.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+                    <div class="min-h-0 overflow-hidden flex items-center justify-center rounded-md shadow-sm border-0">
                         <img src="https://static.wixstatic.com/media/a6967f_56e368dd141b4651bc9d0c8776a01086~mv2.png" alt="Vitórias Internas" class="w-[105%] h-[105%] object-contain max-w-none max-h-none">
                     </div>
                     <div id="victoriesInternalText" contenteditable="true" class="min-h-0 text-[20px] text-white leading-tight outline-none cursor-text px-1 py-0.5"></div>
@@ -325,8 +375,15 @@
         </aside>
 
         <!-- RIGHT: PLANNING -->
-        <aside style="grid-area: planning" class="flex flex-col gap-3 overflow-hidden">
-            <div class="glass-card p-4 flex-1" style="background-image: url('https://static.wixstatic.com/media/a6967f_7bda25c185b24581b7679ed0dedb904e~mv2.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+        <aside style="grid-area: planning" class="flex flex-col gap-3 overflow-visible">
+            <div class="glass-card planning-card-with-external-timer p-4 flex-1 relative" style="background-image: url('https://static.wixstatic.com/media/a6967f_7bda25c185b24581b7679ed0dedb904e~mv2.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+                <div class="refresh-pie-widget" aria-label="Temporizador de refresh da página">
+                    <svg class="refresh-pie-svg" viewBox="0 0 58 58" role="presentation" aria-hidden="true">
+                        <circle class="refresh-pie-track" cx="29" cy="29" r="22"></circle>
+                        <circle id="refreshPieProgress" class="refresh-pie-progress" cx="29" cy="29" r="22"></circle>
+                    </svg>
+                    <div id="refreshPieLabel" class="refresh-pie-label">2h</div>
+                </div>
                 <h3 class="text-[11px] font-bold uppercase text-white tracking-widest border-b border-slate-200 pb-2 mb-2 shrink-0 flex items-center gap-1">
                     <span>⚙️ Linha de Produção</span>
                     <span class="planning-ripple-dot" aria-hidden="true"></span>
@@ -349,8 +406,8 @@
                         </div>
                     </div>
                     <p class="text-[10px] text-blue-50 italic leading-tight max-w-[180px]"></p>
-                    <div class="flex-1 min-h-0 mt-1 w-[66%] p-2 rounded-md overflow-hidden flex items-center justify-center" style="background-image: url('https://static.wixstatic.com/media/a6967f_7bda25c185b24581b7679ed0dedb904e~mv2.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
-                        <img id="visitorLogoPreview" src="https://static.wixstatic.com/media/a6967f_739875a204df4c2494675746b9d6e9e2~mv2.png" alt="Logo do cliente" class="max-w-full max-h-full object-contain">
+                    <div class="flex-1 min-h-0 mt-1 w-[66%] p-2 rounded-md overflow-hidden flex items-center justify-center">
+                        <img id="visitorLogoPreview" src="https://static.wixstatic.com/media/a6967f_739875a204df4c2494675746b9d6e9e2~mv2.png" alt="Logo do cliente" class="max-w-full max-h-full object-contain rounded-md">
                     </div>
                 </div>
                 
@@ -394,10 +451,55 @@
     </div>
 
     <script>
+        const PAGE_REFRESH_MS = 1000 * 60 * 60 * 2;
+        const pageRefreshAt = Date.now() + PAGE_REFRESH_MS;
+
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('pt-PT');
             document.getElementById('date').innerText = now.toLocaleDateString('pt-PT', { weekday: 'long', day: '2-digit', month: 'long' });
+        }
+
+        function formatCountdown(ms) {
+            const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+            const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const seconds = String(totalSeconds % 60).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        function updateRefreshTimer() {
+            const remainingMs = Math.max(0, pageRefreshAt - Date.now());
+            const progress = ((PAGE_REFRESH_MS - remainingMs) / PAGE_REFRESH_MS) * 100;
+            const refreshPieProgress = document.getElementById('refreshPieProgress');
+            const refreshPieLabel = document.getElementById('refreshPieLabel');
+
+            if (!refreshPieProgress || !refreshPieLabel) return;
+
+            const radius = 22;
+            const circumference = 2 * Math.PI * radius;
+            const clampedProgress = Math.min(100, Math.max(0, progress));
+            const dashOffset = circumference * (1 - clampedProgress / 100);
+
+            refreshPieProgress.style.strokeDasharray = `${circumference}`;
+            refreshPieProgress.style.strokeDashoffset = `${dashOffset}`;
+
+            if (clampedProgress < 50) {
+                refreshPieProgress.style.stroke = '#22c55e';
+            } else if (clampedProgress < 80) {
+                refreshPieProgress.style.stroke = '#eab308';
+            } else {
+                refreshPieProgress.style.stroke = '#f97316';
+            }
+
+            const remainingMinutes = Math.ceil(remainingMs / 60000);
+            if (remainingMinutes >= 60) {
+                const hoursLeft = Math.floor(remainingMinutes / 60);
+                const minutesLeft = remainingMinutes % 60;
+                refreshPieLabel.innerText = `${hoursLeft}h ${String(minutesLeft).padStart(2, '0')}`;
+            } else {
+                refreshPieLabel.innerText = `${remainingMinutes}m`;
+            }
         }
 
         function getWeatherEmoji(code) {
@@ -447,11 +549,15 @@
             }
         }
 
-        setInterval(updateClock, 1000);
+        setInterval(() => {
+            updateClock();
+            updateRefreshTimer();
+        }, 1000);
         updateClock();
+        updateRefreshTimer();
         updateWeatherForecast();
         setInterval(updateWeatherForecast, 1000 * 60 * 30);
-        setInterval(() => window.location.reload(), 1000 * 60 * 60 * 2);
+        setTimeout(() => window.location.reload(), PAGE_REFRESH_MS);
 
         const STORAGE_KEY = 'daily-dashboard-state-v1';
 
@@ -1121,6 +1227,11 @@ function getPlanningFillColor(evoValue) {
                 const fillColor = getPlanningFillColor(evo);
                 const title = item.country || item.section || '-';
                 const postLabel = `${postPrefix}${normalizePost(item.post)}`;
+                const lotText = item.quantity ? `LOTE: ${item.lot || '-'}` : (item.lot || '-');
+                const quantityText = item.quantity ? `Qtd.: ${item.quantity}` : '';
+                const lotClass = item.quantity
+                    ? 'truncate bg-white/85 px-2 py-0.5 rounded-md flex-1 min-w-0'
+                    : 'bg-white/85 px-2 py-0.5 rounded-md w-fit max-w-[70%] truncate';
                 const hasLot = Boolean((item.lot || '').trim());
                 const cardToneClass = showAvailability && !hasLot
                     ? ''
@@ -1143,10 +1254,12 @@ function getPlanningFillColor(evoValue) {
                     ${showPostLabel ? `<span class="text-[10px] bg-white/90 px-1.5 py-0.5 rounded-md text-slate-600 font-bold">${postLabel}</span>` : ''}
                 </div>
                 <div class="flex justify-between text-[11px] text-slate-500 mb-1 leading-none gap-2">
-                    <span class="truncate bg-white/85 px-2 py-0.5 rounded-md">${item.lot || '-'}</span>
-                    <span class="font-bold text-slate-700 bg-white/85 px-2 py-0.5 rounded-md">${Math.round(evo)}%</span>
+                    <span class="${lotClass}">${lotText}</span>
+                    <div class="flex items-center gap-1 shrink-0 ml-2">
+                        ${item.quantity ? `<span class="text-[10px] text-slate-600 bg-white/85 px-2 py-0.5 rounded-md">${quantityText}</span>` : ''}
+                        <span class="font-bold text-slate-700 bg-white/85 px-2 py-0.5 rounded-md">${Math.round(evo)}%</span>
+                    </div>
                 </div>
-                ${item.quantity ? `<div class="text-[10px] text-slate-600 mb-1 leading-none truncate bg-white/85 px-2 py-0.5 rounded-md w-fit">QTD/Lote: ${item.quantity}</div>` : ''}
             `;
                 planningList.appendChild(div);
             });

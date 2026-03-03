@@ -2,6 +2,7 @@
 # Linhas vazias e linhas iniciadas por # são ignoradas
 
 [EQUIPA_PRESENTE]
+-
 Richard
 Leonel
 Carlos A.
