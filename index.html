@@ -45,7 +45,7 @@
 
         .map-country {
             fill: #626262;
-            stroke: #000000;
+            stroke: #38bdf8;
             stroke-width: 0.7;
         }
 
@@ -54,7 +54,7 @@
             width: min(90vw, 1531px);
             aspect-ratio: 2 / 1;
             max-height: 72vh;
-            transform: translate(-5%, 16%) scale(1.5);
+            transform: translate(-3%, 16%) scale(1.575);
             transform-origin: center center;
         }
 
@@ -553,9 +553,9 @@
             div.innerHTML = `
                 <div class="flex items-center gap-1.5 overflow-hidden">
                     <div class="status-dot w-1.5 h-1.5 rounded-full shrink-0 ${member.active ? 'bg-green-500' : 'bg-red-500'}"></div>
-                    <span class="editable-name text-[9px] font-bold text-slate-700 truncate">${member.name}</span>
+                    <span class="editable-name text-[12px] font-bold text-slate-700 truncate">${member.name}</span>
                 </div>
-                <span class="text-[8px] text-blue-600 font-bold bg-blue-50 px-1 py-0.5 rounded-full shrink-0">${member.role}</span>
+                <span class="text-[14px] text-blue-600 font-bold bg-blue-50 px-1 py-0.5 rounded-full shrink-0">${member.role}</span>
             `;
 
             const editableName = div.querySelector('.editable-name');
@@ -612,6 +612,7 @@
         const technicalTeamList = document.getElementById('technicalTeamList');
         const addTechnicalCardBtn = document.getElementById('addTechnicalCardBtn');
         let highlightedTechnicalCountries = new Set();
+        let worldFeatures = null;
 
         function getFlagUrl(country) {
             const code = technicalCountryCodes[country] || 'un';
@@ -796,7 +797,6 @@
         const mapPoints = document.getElementById('mapPoints');
         const worldMapSvg = document.getElementById('worldMapSvg');
         const mapSvgSelection = d3.select(worldMapSvg);
-        let worldFeatures = null;
 
         function clusterByDistance(points, thresholdPx) {
             const clusters = [];
