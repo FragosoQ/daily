@@ -1,0 +1,29 @@
+# Ficheiro de configuração de nomes para dropdowns
+# Linhas vazias e linhas iniciadas por # são ignoradas
+
+[EQUIPA_PRESENTE]
+Richard
+Leonel
+Carlos A.
+Tiago
+Diogo
+Fábio
+Carlos T.
+Martins
+Octávio
+Ilídio
+Abel
+Pedro
+Remi
+Gabriel
+Rui
+Miguel
+
+[EQUIPA_TECNICA]
+Tiago
+Diogo
+Miguel
+Richard
+Cândido
+Alexandre
+Leonel

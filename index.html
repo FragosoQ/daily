@@ -367,21 +367,21 @@
                 </div>
                 <div class="flex flex-col">
                     <span class="text-[9px] text-white uppercase font-bold mb-1 leading-none">Total Emissões</span>
-                    <span class="text-sm font-bold text-white">142.5 <span class="text-[9px] font-normal text-white">tCO2e</span></span>
+                    <span class="text-sm font-bold text-white">1051 <span class="text-[9px] font-normal text-white">tCO2e</span></span>
                 </div>
                 <div class="flex flex-col items-center">
                     <div class="bg-green-50 px-4 py-1.5 rounded-xl border border-green-200 text-center">
                         <span class="text-[9px] text-green-700 uppercase block font-bold leading-none">Pegada Líquida</span>
-                        <span class="text-xl font-black text-green-600 leading-none">108.3</span>
+                        <span class="text-xl font-black text-green-600 leading-none">286.61</span>
                     </div>
                 </div>
                 <div class="flex flex-col text-right">
                     <span class="text-[9px] text-white uppercase font-bold mb-1 leading-none">Crédito Energético</span>
-                    <span class="text-sm font-bold text-white">-34.2 MWh</span>
+                    <span class="text-sm font-bold text-white">171 <span class="text-[9px] font-normal text-white">tCO2e</span></span>
                 </div>
                 <div class="flex flex-col text-right border-r-2 border-green-500 pr-3">
-                    <span class="text-[9px] text-white uppercase font-bold mb-1 leading-none">Pegada / Equip.</span>
-                    <span class="text-sm font-bold text-white">0.82 <span class="text-[9px] font-normal text-white">tCO2e</span></span>
+                    <span class="text-[9px] text-white uppercase font-bold mb-1 leading-none">MWS Pegada</span>
+                    <span class="text-sm font-bold text-white">2.29 <span class="text-[9px] font-normal text-white">tCO2e</span></span>
                 </div>
             </div>
         </footer>
@@ -437,6 +437,17 @@
             BRASIL: 'Brasil',
             USA: 'USA'
         };
+
+        let presentTeamNameOptions = [
+            'Richard', 'Leonel', 'Carlos A.', 'Tiago', 'Diogo', 'Fábio', 'Carlos T.', 'Martins',
+            'Octávio', 'Ilídio', 'Abel', 'Pedro', 'Remi', 'Gabriel', 'Rui', 'Miguel'
+        ];
+
+        let technicalTeamNameOptions = [
+            'Tiago', 'Diogo', 'Miguel', 'Richard', 'Cândido', 'Alexandre', 'Leonel'
+        ];
+
+        const peopleListsConfigUrl = 'people-lists.txt';
 
         const teamDefaults = [
             { name: 'Carlos Ferreira', role: 'P1' }, { name: 'Ana Martins', role: 'P2' },
@@ -585,53 +596,120 @@
         });
 
         const teamList = document.getElementById('teamList');
+
+        function getNameSelectOptions(options, currentValue) {
+            const normalizedCurrent = String(currentValue || '').trim();
+            const optionValues = normalizedCurrent && !options.includes(normalizedCurrent)
+                ? [normalizedCurrent, ...options]
+                : options;
+
+            return optionValues
+                .map(name => `<option value="${name}">${name}</option>`)
+                .join('');
+        }
+
+        function parsePeopleListsConfig(text) {
+            const sections = {
+                EQUIPA_PRESENTE: [],
+                EQUIPA_TECNICA: []
+            };
+
+            let currentSection = null;
+            const lines = String(text || '').split(/\r?\n/);
+
+            lines.forEach(rawLine => {
+                const line = rawLine.trim();
+                if (!line || line.startsWith('#')) return;
+
+                if (line.startsWith('[') && line.endsWith(']')) {
+                    const sectionName = line.slice(1, -1).trim().toUpperCase();
+                    currentSection = Object.prototype.hasOwnProperty.call(sections, sectionName) ? sectionName : null;
+                    return;
+                }
+
+                if (!currentSection) return;
+                sections[currentSection].push(line);
+            });
+
+            return sections;
+        }
+
+        function refreshNameDropdownOptions() {
+            const presentSelects = [...document.querySelectorAll('.present-name-select')];
+            presentSelects.forEach((select, index) => {
+                const currentValue = select.value || appState.team[index]?.name || '';
+                select.innerHTML = getNameSelectOptions(presentTeamNameOptions, currentValue);
+                select.value = currentValue;
+                if (appState.team[index]) {
+                    appState.team[index].name = select.value;
+                }
+            });
+
+            const technicalSelects = [...document.querySelectorAll('.technical-name-select')];
+            technicalSelects.forEach((select, index) => {
+                const currentValue = select.value || appState.technicalTeam[index]?.name || '';
+                select.innerHTML = getNameSelectOptions(technicalTeamNameOptions, currentValue || technicalTeamNameOptions[0]);
+                select.value = currentValue || technicalTeamNameOptions[0];
+                if (appState.technicalTeam[index]) {
+                    appState.technicalTeam[index].name = select.value;
+                }
+            });
+
+            saveDashboardState();
+        }
+
+        async function loadPeopleListsConfig() {
+            try {
+                const response = await fetch(peopleListsConfigUrl, { cache: 'no-store' });
+                if (!response.ok) return;
+
+                const text = await response.text();
+                const parsed = parsePeopleListsConfig(text);
+
+                if (parsed.EQUIPA_PRESENTE.length) {
+                    presentTeamNameOptions = parsed.EQUIPA_PRESENTE;
+                }
+
+                if (parsed.EQUIPA_TECNICA.length) {
+                    technicalTeamNameOptions = parsed.EQUIPA_TECNICA;
+                }
+
+                refreshNameDropdownOptions();
+            } catch {
+            }
+        }
+
         appState.team.forEach((member, index) => {
             const div = document.createElement('div');
             div.className = 'flex items-center justify-between bg-white/90 p-2 px-3 rounded-lg border border-slate-100 shadow-sm overflow-hidden cursor-pointer';
             div.innerHTML = `
                 <div class="flex items-center gap-1.5 overflow-hidden">
                     <div class="status-dot w-1.5 h-1.5 rounded-full shrink-0 ${member.active ? 'bg-green-500' : 'bg-red-500'}"></div>
-                    <span class="editable-name text-[12px] font-bold text-slate-700 truncate">${member.name}</span>
+                    <select class="present-name-select text-[12px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 outline-none focus:ring-1 focus:ring-blue-400 min-w-0 w-full">
+                        ${getNameSelectOptions(presentTeamNameOptions, member.name)}
+                    </select>
                 </div>
                 <span class="text-[14px] text-blue-600 font-bold bg-blue-50 px-1 py-0.5 rounded-full shrink-0">${member.role}</span>
             `;
 
-            const editableName = div.querySelector('.editable-name');
+            const nameSelect = div.querySelector('.present-name-select');
+            nameSelect.value = member.name;
+
+            nameSelect.addEventListener('click', (event) => {
+                event.stopPropagation();
+            });
+
+            nameSelect.addEventListener('change', (event) => {
+                event.stopPropagation();
+                appState.team[index].name = nameSelect.value;
+                saveDashboardState();
+            });
 
             div.addEventListener('click', () => {
-                if (editableName.isContentEditable) return;
                 const statusDot = div.querySelector('.status-dot');
                 appState.team[index].active = !appState.team[index].active;
                 statusDot.classList.toggle('bg-green-500', appState.team[index].active);
                 statusDot.classList.toggle('bg-red-500', !appState.team[index].active);
-                saveDashboardState();
-            });
-
-            editableName.addEventListener('dblclick', (event) => {
-                event.stopPropagation();
-                editableName.contentEditable = 'true';
-                editableName.focus();
-                const selection = window.getSelection();
-                const range = document.createRange();
-                range.selectNodeContents(editableName);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            });
-
-            editableName.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    editableName.blur();
-                }
-            });
-
-            editableName.addEventListener('blur', () => {
-                editableName.contentEditable = 'false';
-                const nextName = editableName.innerText.trim();
-                if (nextName) {
-                    appState.team[index].name = nextName;
-                }
-                editableName.innerText = appState.team[index].name;
                 saveDashboardState();
             });
 
@@ -676,7 +754,7 @@
 
         function updateHighlightedMapPoints() {
             highlightedTechnicalCountries = new Set(
-                [...technicalTeamList.querySelectorAll('select')].map(select => select.value)
+                [...technicalTeamList.querySelectorAll('.technical-country-select')].map(select => select.value)
             );
 
             if (worldFeatures) {
@@ -698,24 +776,32 @@
             card.innerHTML = `
                 <div class="flex items-start gap-1.5 min-w-0">
                     <img class="technical-flag w-4 h-3 rounded-[2px] object-cover shrink-0 mt-1" src="${getFlagUrl(initialCountry)}" alt="Bandeira de ${initialCountry}" />
-                    <input type="text" placeholder="Nome" class="flex-1 w-full min-w-0 text-[9px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded px-1.5 py-1 outline-none focus:ring-1 focus:ring-blue-400" value="${memberState.name || ''}" />
+                    <select class="technical-name-select flex-1 w-full min-w-0 text-[9px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded px-1.5 py-1 outline-none focus:ring-1 focus:ring-blue-400">
+                        ${getNameSelectOptions(technicalTeamNameOptions, memberState.name || technicalTeamNameOptions[0])}
+                    </select>
                     <button type="button" class="technical-card-close shrink-0 w-4 h-4 rounded-full bg-slate-200/80 text-slate-600 text-[10px] leading-none flex items-center justify-center hover:bg-slate-300" aria-label="Remover cartão técnico" title="Remover">×</button>
                 </div>
-                <select class="w-full text-[8px] font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none focus:ring-1 focus:ring-blue-400">
+                <select class="technical-country-select w-full text-[8px] font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none focus:ring-1 focus:ring-blue-400">
                     ${countryOptions}
                 </select>
             `;
 
-            const nameInput = card.querySelector('input');
-            const countrySelect = card.querySelector('select');
+            const nameSelect = card.querySelector('.technical-name-select');
+            const countrySelect = card.querySelector('.technical-country-select');
             const flagElement = card.querySelector('.technical-flag');
             const closeButton = card.querySelector('.technical-card-close');
 
+            const initialName = technicalTeamNameOptions.includes(memberState.name)
+                ? memberState.name
+                : (memberState.name || technicalTeamNameOptions[0]);
+
+            nameSelect.value = initialName;
+            memberState.name = initialName;
             countrySelect.value = initialCountry;
             memberState.country = initialCountry;
 
-            nameInput.addEventListener('input', () => {
-                memberState.name = nameInput.value;
+            nameSelect.addEventListener('change', () => {
+                memberState.name = nameSelect.value;
                 saveDashboardState();
             });
 
@@ -761,6 +847,7 @@
             createTechnicalCard(memberState, false);
         });
         updateAddTechnicalButton();
+        loadPeopleListsConfig();
 
         const planningList = document.getElementById('planningList');
         const planningFallback = [
@@ -934,7 +1021,7 @@
                 const mappedPlanningRows = planningRows
                     .map(columns => ({
                         post: (columns[0] || '').trim(),
-                        country: (columns[8] || '').trim(),
+                        country: (columns[9] || '').trim(),
                         lot: (columns[11] || '').trim(),
                         evo: (columns[22] || '').trim()
                     }))
