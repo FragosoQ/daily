@@ -1131,15 +1131,15 @@
                 const postLabel = `${postPrefix}${normalizePost(item.post)}`;
                 const hasLot = Boolean((item.lot || '').trim());
                 const cardToneClass = showAvailability && !hasLot
-                    ? 'border-slate-100'
-                    : 'bg-white/90 border-slate-100';
+                    ? ''
+                    : 'bg-white/90';
                 const availabilityStyle = showAvailability && !hasLot
                     ? "background-image: url('https://static.wixstatic.com/media/a6967f_7bda25c185b24581b7679ed0dedb904e~mv2.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"
                     : '';
                 const evoFillStyle = `background: linear-gradient(90deg, ${fillColor} 0%, ${fillColor} ${evo}%, rgba(255,255,255,0.92) ${evo}%, rgba(255,255,255,0.92) 100%);`;
 
                 const div = document.createElement('div');
-                div.className = `planning-item flex flex-col justify-center ${cardToneClass} p-2 rounded-xl border shadow-sm`;
+                div.className = `planning-item flex flex-col justify-center ${cardToneClass} p-2 rounded-xl shadow-sm`;
                 if (availabilityStyle) {
                     div.style.cssText = availabilityStyle;
                 } else {
