@@ -812,7 +812,7 @@
             return digits ? digits[0] : raw;
         }
 
-        function renderPlanningCards(items, postPrefix, showAvailability = false) {
+        function renderPlanningCards(items, postPrefix, showAvailability = false, showPostLabel = true) {
             items.forEach(item => {
                 const evo = parseEvo(item.evo);
                 const color = getPlanningColor(evo);
@@ -820,15 +820,21 @@
                 const postLabel = `${postPrefix}${normalizePost(item.post)}`;
                 const hasLot = Boolean((item.lot || '').trim());
                 const cardToneClass = showAvailability && !hasLot
-                    ? 'bg-green-50/90 border-green-200'
+                    ? 'border-slate-100'
                     : 'bg-white/90 border-slate-100';
+                const availabilityStyle = showAvailability && !hasLot
+                    ? "background-image: url('https://static.wixstatic.com/media/a6967f_7bda25c185b24581b7679ed0dedb904e~mv2.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"
+                    : '';
 
                 const div = document.createElement('div');
                 div.className = `planning-item flex flex-col justify-center ${cardToneClass} p-2 rounded-xl border shadow-sm`;
+                if (availabilityStyle) {
+                    div.style.cssText = availabilityStyle;
+                }
                 div.innerHTML = `
                 <div class="flex justify-between items-center leading-none mb-1">
                     <span class="text-[10px] font-bold text-slate-800 uppercase truncate">${title}</span>
-                    <span class="text-[8px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-bold">${postLabel}</span>
+                    ${showPostLabel ? `<span class="text-[8px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-bold">${postLabel}</span>` : ''}
                 </div>
                 <div class="flex justify-between text-[9px] text-slate-500 mb-1 leading-none">
                     <span class="truncate">${item.lot || '-'}</span>
@@ -845,14 +851,14 @@
 
         function renderPlanning(mainItems, weldingItems) {
             planningList.innerHTML = '';
-            renderPlanningCards(mainItems, 'PM', true);
+            renderPlanningCards(mainItems, 'PM', true, true);
 
             if (weldingItems.length) {
                 const separator = document.createElement('div');
                 separator.className = 'w-full h-px bg-white/50 my-0.5 shrink-0';
                 separator.setAttribute('aria-hidden', 'true');
                 planningList.appendChild(separator);
-                renderPlanningCards(weldingItems, 'PS');
+                renderPlanningCards(weldingItems, 'PS', false, false);
             }
         }
 
