@@ -742,6 +742,9 @@
 
         function setWelcomeFlagMenuOpen(isOpen) {
             if (isOpen) {
+                welcomeCountries = [...technicalCountries];
+                renderWelcomeFlagMenu();
+
                 const triggerRect = welcomeFlagTrigger.getBoundingClientRect();
                 welcomeFlagMenu.classList.remove('hidden');
                 welcomeFlagMenu.style.display = 'block';
@@ -772,14 +775,13 @@
             welcomeFlagTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         }
 
-        renderWelcomeFlagMenu();
+        syncWelcomeCountriesWithTechnical();
         welcomeFlagMenu.style.display = 'none';
-        updateWelcomeCardByCountry(appState.welcomeCountry);
 
         welcomeFlagTrigger.addEventListener('click', (event) => {
             event.stopPropagation();
-            const isOpen = welcomeFlagMenu.classList.contains('hidden');
-            setWelcomeFlagMenuOpen(isOpen);
+            const isCurrentlyOpen = welcomeFlagTrigger.getAttribute('aria-expanded') === 'true';
+            setWelcomeFlagMenuOpen(!isCurrentlyOpen);
         });
 
         welcomeFlagMenu.addEventListener('click', (event) => {
