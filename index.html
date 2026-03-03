@@ -410,13 +410,60 @@
 
         const persistedState = loadDashboardState();
 
-        const welcomeFlagCodes = {
-            PORTUGAL: 'pt',
-            ESPANHA: 'es',
-            FRANÇA: 'fr',
+        const countryFlagCodes = {
             ALEMANHA: 'de',
+            ARGENTINA: 'ar',
+            'AUSTRÁLIA': 'au',
+            'ÁUSTRIA': 'at',
+            'BÉLGICA': 'be',
+            'BIELORÚSSIA': 'by',
             BRASIL: 'br',
-            USA: 'us'
+            'BULGÁRIA': 'bg',
+            'CANADÁ': 'ca',
+            'CHÉQUIA': 'cz',
+            CHILE: 'cl',
+            CHIPRE: 'cy',
+            'COLÔMBIA': 'co',
+            'CROÁCIA': 'hr',
+            DINAMARCA: 'dk',
+            DUBAI: 'ae',
+            EGIPTO: 'eg',
+            'EL SALVADOR': 'sv',
+            'ESLOVÁQUIA': 'sk',
+            ESPANHA: 'es',
+            FILIPINAS: 'ph',
+            'FINLÂNDIA': 'fi',
+            'FRANÇA': 'fr',
+            'GRÉCIA': 'gr',
+            GUATEMALA: 'gt',
+            HONDURAS: 'hn',
+            'HONG KONG': 'hk',
+            HUNGRIA: 'hu',
+            'INDONÉSIA': 'id',
+            ISRAEL: 'il',
+            'ITÁLIA': 'it',
+            'LITUÂNIA': 'lt',
+            'MÉXICO': 'mx',
+            'MONGÓLIA': 'mn',
+            NORUEGA: 'no',
+            'PAISES BAIXOS': 'nl',
+            PANAMA: 'pa',
+            'POLÓNIA': 'pl',
+            PORTUGAL: 'pt',
+            QATAR: 'qa',
+            'REP. CHECA': 'cz',
+            'REP. DOMINICANA': 'do',
+            'ROMÉNIA': 'ro',
+            'RÚSSIA': 'ru',
+            'SAUDI ARABIA': 'sa',
+            SINGAPURA: 'sg',
+            'SUÉCIA': 'se',
+            'SUIÇA': 'ch',
+            'TAILÂNDIA': 'th',
+            TAIWAN: 'tw',
+            UK: 'gb',
+            USA: 'us',
+            'UZBEQUISTÃO': 'uz'
         };
 
         const welcomeTranslations = {
@@ -428,15 +475,7 @@
             USA: 'Welcome'
         };
 
-        const welcomeCountries = ['PORTUGAL', 'ESPANHA', 'FRANÇA', 'ALEMANHA', 'BRASIL', 'USA'];
-        const welcomeCountryNames = {
-            PORTUGAL: 'Portugal',
-            ESPANHA: 'Espanha',
-            FRANÇA: 'França',
-            ALEMANHA: 'Alemanha',
-            BRASIL: 'Brasil',
-            USA: 'USA'
-        };
+        let welcomeCountries = ['PORTUGAL', 'ESPANHA', 'FRANÇA', 'ALEMANHA', 'BRASIL', 'USA'];
 
         let presentTeamNameOptions = [
             'Richard', 'Leonel', 'Carlos A.', 'Tiago', 'Diogo', 'Fábio', 'Carlos T.', 'Martins',
@@ -448,20 +487,22 @@
         ];
 
         const peopleListsConfigUrl = 'people-lists.txt';
+        const technicalCountriesConfigUrl = 'technical-countries.txt';
 
         const teamDefaults = [
-            { name: 'Carlos Ferreira', role: 'P1' }, { name: 'Ana Martins', role: 'P2' },
-            { name: 'Pedro Vale', role: 'P3' }, { name: 'Maria Luz', role: 'Log' },
-            { name: 'Jorge Cruz', role: 'P4' }, { name: 'Rita Gomes', role: 'P5' },
-            { name: 'Vasco Lima', role: 'P6' }, { name: 'Sofia M.', role: 'P1' },
-            { name: 'Luis T.', role: 'P4' }, { name: 'Inês R.', role: 'P2' },
-            { name: 'Miguel S.', role: 'P3' }, { name: 'Joana B.', role: 'P5' },
-            { name: 'Tiago F.', role: 'P6' }, { name: 'Helena G.', role: 'QC' },
-            { name: 'Bruno A.', role: 'P2' }, { name: 'Patrícia N.', role: 'Log' }
+            { name: 'Carlos T.', role: 'L1' }, { name: '', role: 'L2' },
+            { name: 'Martins', role: 'C1' }, { name: 'Octávio', role: 'S1' },
+            { name: 'Ilídio', role: 'S2' }, { name: 'Abel', role: 'S3' },
+            { name: 'Pedro', role: 'S4' }, { name: '', role: 'S5' },
+            { name: 'Gabriel', role: 'A1' }, { name: 'Rui', role: 'A2' },
+            { name: 'Richard', role: 'M1' }, { name: 'Leonel', role: 'M2' },
+            { name: 'Carlos A.', role: 'M3' }, { name: 'Diogo', role: 'M4' },
+            { name: 'Fábio', role: 'M5' }, { name: '', role: 'M6' },
+            { name: '', role: 'PM1' }
         ];
 
         const maxTechnicalCards = 4;
-        const technicalCountries = ['PORTUGAL', 'ESPANHA', 'FRANÇA', 'ALEMANHA', 'BRASIL', 'USA'];
+        let technicalCountries = ['PORTUGAL', 'ESPANHA', 'FRANÇA', 'ALEMANHA', 'BRASIL', 'USA'];
 
         const appState = {
             welcomeCountry: welcomeCountries.includes(persistedState.welcomeCountry) ? persistedState.welcomeCountry : 'PORTUGAL',
@@ -491,7 +532,7 @@
         }
 
         function getWelcomeFlagUrl(country) {
-            const code = welcomeFlagCodes[country] || 'un';
+            const code = countryFlagCodes[country] || 'un';
             return `https://flagcdn.com/w40/${code}.png`;
         }
 
@@ -520,10 +561,21 @@
                 .map(country => `
                     <button type="button" data-country="${country}" class="w-full flex items-center gap-2 px-2 py-1 rounded-md hover:bg-slate-100 text-left">
                         <img src="${getWelcomeFlagUrl(country)}" alt="Bandeira de ${country}" class="w-4 h-3 rounded-[2px] object-cover shrink-0" />
-                        <span class="text-[10px] font-semibold">${welcomeCountryNames[country]}</span>
+                        <span class="text-[10px] font-semibold">${country}</span>
                     </button>
                 `)
                 .join('');
+        }
+
+        function syncWelcomeCountriesWithTechnical() {
+            welcomeCountries = [...technicalCountries];
+            renderWelcomeFlagMenu();
+
+            const nextCountry = welcomeCountries.includes(appState.welcomeCountry)
+                ? appState.welcomeCountry
+                : (welcomeCountries[0] || 'PORTUGAL');
+
+            updateWelcomeCardByCountry(nextCountry, true);
         }
 
         function setWelcomeFlagMenuOpen(isOpen) {
@@ -679,6 +731,75 @@
             }
         }
 
+        function parseTechnicalCountriesConfig(text) {
+            const countries = [];
+            const seen = new Set();
+            const lines = String(text || '').split(/\r?\n/);
+
+            lines.forEach(rawLine => {
+                const line = rawLine.trim();
+                if (!line || line.startsWith('#')) return;
+                if (normalizeCountryKey(line) === 'PAIS') return;
+
+                const upperLine = line.toUpperCase();
+                if (seen.has(upperLine)) return;
+                seen.add(upperLine);
+                countries.push(upperLine);
+            });
+
+            return countries;
+        }
+
+        function refreshTechnicalCountryDropdownOptions() {
+            const countrySelects = [...document.querySelectorAll('.technical-country-select')];
+            countrySelects.forEach((select, index) => {
+                const memberState = appState.technicalTeam[index];
+                const currentValue = memberState?.country || select.value || technicalCountries[0];
+
+                select.innerHTML = technicalCountries
+                    .map(country => `<option value="${country}">${country}</option>`)
+                    .join('');
+
+                const nextValue = technicalCountries.includes(currentValue) ? currentValue : technicalCountries[0];
+                select.value = nextValue;
+
+                if (memberState) {
+                    memberState.country = nextValue;
+                    const card = select.closest('div.bg-white\/90');
+                    const flagElement = card?.querySelector('.technical-flag');
+                    if (flagElement) {
+                        flagElement.src = getFlagUrl(nextValue);
+                        flagElement.alt = `Bandeira de ${nextValue}`;
+                    }
+                }
+            });
+
+            updateHighlightedMapPoints();
+            saveDashboardState();
+        }
+
+        async function loadTechnicalCountriesConfig() {
+            try {
+                const response = await fetch(technicalCountriesConfigUrl, { cache: 'no-store' });
+                if (!response.ok) return;
+
+                const text = await response.text();
+                const parsedCountries = parseTechnicalCountriesConfig(text);
+                if (!parsedCountries.length) return;
+
+                technicalCountries = parsedCountries;
+
+                appState.technicalTeam = appState.technicalTeam.map(member => ({
+                    ...member,
+                    country: technicalCountries.includes(member.country) ? member.country : technicalCountries[0]
+                }));
+
+                refreshTechnicalCountryDropdownOptions();
+                syncWelcomeCountriesWithTechnical();
+            } catch {
+            }
+        }
+
         appState.team.forEach((member, index) => {
             const div = document.createElement('div');
             div.className = 'flex items-center justify-between bg-white/90 p-2 px-3 rounded-lg border border-slate-100 shadow-sm overflow-hidden cursor-pointer';
@@ -717,14 +838,7 @@
         });
 
         let technicalCardsCount = 0;
-        const technicalCountryCodes = {
-            PORTUGAL: 'pt',
-            ESPANHA: 'es',
-            FRANÇA: 'fr',
-            ALEMANHA: 'de',
-            BRASIL: 'br',
-            USA: 'us'
-        };
+        const technicalCountryCodes = countryFlagCodes;
         const technicalTeamList = document.getElementById('technicalTeamList');
         const addTechnicalCardBtn = document.getElementById('addTechnicalCardBtn');
         let highlightedTechnicalCountries = new Set();
@@ -754,7 +868,7 @@
 
         function updateHighlightedMapPoints() {
             highlightedTechnicalCountries = new Set(
-                [...technicalTeamList.querySelectorAll('.technical-country-select')].map(select => select.value)
+                [...technicalTeamList.querySelectorAll('.technical-country-select')].map(select => normalizeCountryKey(select.value))
             );
 
             if (worldFeatures) {
@@ -848,6 +962,7 @@
         });
         updateAddTechnicalButton();
         loadPeopleListsConfig();
+        loadTechnicalCountriesConfig();
 
         const planningList = document.getElementById('planningList');
         const planningFallback = [
@@ -1180,7 +1295,7 @@
                 const pointSize = 4.656;
                 const rippleMax = 36;
                 const isMontagemHighlighted = cluster.countries.some(country => highlightedMontagemCountries.has(normalizeCountryKey(country)));
-                const isHighlighted = cluster.countries.some(country => highlightedTechnicalCountries.has(country));
+                const isHighlighted = cluster.countries.some(country => highlightedTechnicalCountries.has(normalizeCountryKey(country)));
 
                 if (isMontagemHighlighted) {
                     point.className = 'pulse-point pulse-point--montagem';
