@@ -159,14 +159,6 @@
             min-height: 0;
         }
 
-        .planning-text-outline {
-            text-shadow:
-                -1px -1px 0 rgba(255, 255, 255, 0.85),
-                1px -1px 0 rgba(255, 255, 255, 0.85),
-                -1px 1px 0 rgba(255, 255, 255, 0.85),
-                1px 1px 0 rgba(255, 255, 255, 0.85);
-        }
-
         /* Grid específico para Equipa Presente */
         .team-grid {
             display: grid;
@@ -1146,17 +1138,15 @@
                     div.style.cssText = evoFillStyle;
                 }
                 div.innerHTML = `
-                <div class="planning-text-outline">
-                <div class="flex justify-between items-center leading-none mb-1">
-                    <span class="text-[17px] font-bold text-slate-800 uppercase truncate">${title}</span>
-                    ${showPostLabel ? `<span class="text-[15px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-bold">${postLabel}</span>` : ''}
+                <div class="flex justify-between items-center leading-none mb-1 gap-2">
+                    <span class="text-[12px] font-bold text-slate-800 uppercase truncate bg-white/90 px-2 py-0.5 rounded-md">${title}</span>
+                    ${showPostLabel ? `<span class="text-[10px] bg-white/90 px-1.5 py-0.5 rounded-md text-slate-600 font-bold">${postLabel}</span>` : ''}
                 </div>
-                <div class="flex justify-between text-[16px] text-slate-500 mb-1 leading-none">
-                    <span class="truncate">${item.lot || '-'}</span>
-                    <span class="font-bold text-slate-700">${Math.round(evo)}%</span>
+                <div class="flex justify-between text-[11px] text-slate-500 mb-1 leading-none gap-2">
+                    <span class="truncate bg-white/85 px-2 py-0.5 rounded-md">${item.lot || '-'}</span>
+                    <span class="font-bold text-slate-700 bg-white/85 px-2 py-0.5 rounded-md">${Math.round(evo)}%</span>
                 </div>
-                ${item.quantity ? `<div class="text-[15px] text-slate-600 mb-1 leading-none truncate">QTD/Lote: ${item.quantity}</div>` : ''}
-                </div>
+                ${item.quantity ? `<div class="text-[10px] text-slate-600 mb-1 leading-none truncate bg-white/85 px-2 py-0.5 rounded-md w-fit">QTD/Lote: ${item.quantity}</div>` : ''}
             `;
                 planningList.appendChild(div);
             });
