@@ -128,6 +128,12 @@
             --pulse-shadow-soft: 0 0 30px rgba(249, 115, 22, 0.5);
         }
 
+        .pulse-point--montagem {
+            --pulse-color: #eab308;
+            --pulse-shadow: 0 0 15px #eab308;
+            --pulse-shadow-soft: 0 0 30px rgba(234, 179, 8, 0.5);
+        }
+
         .pulse-point::after {
             animation-delay: 1.25s;
         }
@@ -195,6 +201,35 @@
         }
 
         .technical-ripple-dot::after {
+            animation-delay: 1.25s;
+        }
+
+        .planning-ripple-dot {
+            position: relative;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #eab308;
+            box-shadow: 0 0 8px rgba(234, 179, 8, 0.9);
+            flex-shrink: 0;
+        }
+
+        .planning-ripple-dot::before,
+        .planning-ripple-dot::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            border: 1.2px solid rgba(234, 179, 8, 0.95);
+            border-radius: 50%;
+            animation: ripple 2.5s infinite ease-out;
+            opacity: 0;
+        }
+
+        .planning-ripple-dot::after {
             animation-delay: 1.25s;
         }
 
@@ -287,8 +322,9 @@
         <!-- RIGHT: PLANNING -->
         <aside style="grid-area: planning" class="flex flex-col gap-3 overflow-hidden">
             <div class="glass-card p-4 flex-1" style="background-image: url('https://static.wixstatic.com/media/a6967f_7bda25c185b24581b7679ed0dedb904e~mv2.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
-                <h3 class="text-[11px] font-bold uppercase text-white tracking-widest border-b border-slate-200 pb-2 mb-2 shrink-0">
-                    ⚙️ Linha de Produção
+                <h3 class="text-[11px] font-bold uppercase text-white tracking-widest border-b border-slate-200 pb-2 mb-2 shrink-0 flex items-center gap-1">
+                    <span>⚙️ Linha de Produção</span>
+                    <span class="planning-ripple-dot" aria-hidden="true"></span>
                 </h3>
                 <div class="flex flex-col gap-2 h-full justify-between overflow-hidden" id="planningList">
                     <!-- Gerado via JavaScript -->
@@ -614,7 +650,16 @@
         const technicalTeamList = document.getElementById('technicalTeamList');
         const addTechnicalCardBtn = document.getElementById('addTechnicalCardBtn');
         let highlightedTechnicalCountries = new Set();
+        let highlightedMontagemCountries = new Set();
         let worldFeatures = null;
+
+        function normalizeCountryKey(value) {
+            return String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim()
+                .toUpperCase();
+        }
 
         function getFlagUrl(country) {
             const code = technicalCountryCodes[country] || 'un';
@@ -733,7 +778,7 @@
             { section: 'Soldadura', lot: 'S-400', post: 4, evo: 82 },
             { section: 'Soldadura', lot: 'S-500', post: 5, evo: 91 }
         ];
-        const planningSheetCsvUrl = 'https://docs.google.com/spreadsheets/d/1rp5XAQQyCb6cXIGSG5JaLmhdNdoc81-S9WaqM3owh6s/gviz/tq?tqx=out:csv';
+        const planningSheetCsvUrl = 'https://docs.google.com/spreadsheets/d/1rp5XAQQyCb6cXIGSG5JaLmhdNdoc81-S9WaqM3owh6s/gviz/tq?tqx=out:csv&sheet=montagem';
         const weldingSheetCsvUrl = 'https://docs.google.com/spreadsheets/d/1rp5XAQQyCb6cXIGSG5JaLmhdNdoc81-S9WaqM3owh6s/gviz/tq?tqx=out:csv&sheet=soldadura';
         const maxPlanningRows = 6;
         const maxWeldingRows = 5;
@@ -876,6 +921,16 @@
                 const planningRows = planningResponse.ok ? parseCsv(await planningResponse.text()).slice(1) : [];
                 const weldingRows = weldingResponse.ok ? parseCsv(await weldingResponse.text()).slice(1) : [];
 
+                highlightedMontagemCountries = new Set(
+                    planningRows
+                        .map(columns => normalizeCountryKey(columns[9]))
+                        .filter(Boolean)
+                );
+
+                if (worldFeatures) {
+                    renderGeoMap();
+                }
+
                 const mappedPlanningRows = planningRows
                     .map(columns => ({
                         post: (columns[0] || '').trim(),
@@ -902,6 +957,7 @@
                     mappedWeldingRows.length ? mappedWeldingRows : weldingFallback
                 );
             } catch (error) {
+                highlightedMontagemCountries = new Set();
                 renderPlanning(planningFallback, weldingFallback);
             }
         }
@@ -1036,9 +1092,16 @@
                 const point = document.createElement('div');
                 const pointSize = 4.656;
                 const rippleMax = 36;
+                const isMontagemHighlighted = cluster.countries.some(country => highlightedMontagemCountries.has(normalizeCountryKey(country)));
                 const isHighlighted = cluster.countries.some(country => highlightedTechnicalCountries.has(country));
 
-                point.className = isHighlighted ? 'pulse-point pulse-point--highlighted' : 'pulse-point';
+                if (isMontagemHighlighted) {
+                    point.className = 'pulse-point pulse-point--montagem';
+                } else if (isHighlighted) {
+                    point.className = 'pulse-point pulse-point--highlighted';
+                } else {
+                    point.className = 'pulse-point';
+                }
                 point.style.top = `${(cluster.y / height) * 100}%`;
                 point.style.left = `${(cluster.x / width) * 100}%`;
                 point.style.setProperty('--point-size', `${pointSize}px`);
