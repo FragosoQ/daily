@@ -315,7 +315,7 @@
             <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center leading-none">
                 <div class="flex items-center gap-2">
                     <img src="https://static.wixstatic.com/media/a6967f_63fc48d3787f4b99b28eb81d9aa33de8~mv2.png" alt="Escudo de segurança" class="w-5 h-5 object-contain" style="filter: brightness(0) invert(1);">
-                    <span class="text-2xl font-black text-white">428 Dias</span>
+                    <span id="safetyCounter" class="text-2xl font-black text-white">0 Dias</span>
                     <div class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.7)]"></div>
                 </div>
                 <!--<span class="text-[11px] text-slate-400 uppercase font-bold tracking-tight mt-1">Sem Acidentes</span>-->
@@ -457,11 +457,22 @@
     <script>
         const PAGE_REFRESH_MS = 1000 * 60 * 60 * 2;
         const pageRefreshAt = Date.now() + PAGE_REFRESH_MS;
+        const SAFETY_START_DATE = new Date(2025, 0, 5);
 
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('pt-PT');
             document.getElementById('date').innerText = now.toLocaleDateString('pt-PT', { weekday: 'long', day: '2-digit', month: 'long' });
+        }
+
+        function updateSafetyCounter() {
+            const safetyCounter = document.getElementById('safetyCounter');
+            if (!safetyCounter) return;
+
+            const today = new Date();
+            const todayAtMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const elapsedDays = Math.max(0, Math.floor((todayAtMidnight - SAFETY_START_DATE) / (1000 * 60 * 60 * 24)));
+            safetyCounter.innerText = `${elapsedDays} Dias`;
         }
 
         function formatCountdown(ms) {
@@ -555,9 +566,11 @@
 
         setInterval(() => {
             updateClock();
+            updateSafetyCounter();
             updateRefreshTimer();
         }, 1000);
         updateClock();
+        updateSafetyCounter();
         updateRefreshTimer();
         updateWeatherForecast();
         setInterval(updateWeatherForecast, 1000 * 60 * 30);
