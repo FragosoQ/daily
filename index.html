@@ -577,6 +577,7 @@
         setTimeout(() => window.location.reload(), PAGE_REFRESH_MS);
 
         const STORAGE_KEY = 'daily-dashboard-state-v1';
+        const TECHNICAL_TEAM_STORAGE_KEY = 'daily-dashboard-technical-team-v1';
 
         function loadDashboardState() {
             try {
@@ -587,7 +588,18 @@
             }
         }
 
+        function loadTechnicalTeamState() {
+            try {
+                const raw = localStorage.getItem(TECHNICAL_TEAM_STORAGE_KEY);
+                const parsed = raw ? JSON.parse(raw) : null;
+                return Array.isArray(parsed) ? parsed : null;
+            } catch {
+                return null;
+            }
+        }
+
         const persistedState = loadDashboardState();
+        const persistedTechnicalTeam = loadTechnicalTeamState();
 
         const countryFlagCodes = {
             ALEMANHA: 'de',
@@ -745,12 +757,19 @@
                     active: typeof member?.active === 'boolean' ? member.active : true
                 }))
                 : teamDefaults.map(member => ({ ...member, active: true })),
-            technicalTeam: Array.isArray(persistedState.technicalTeam)
+            technicalTeam: Array.isArray(persistedTechnicalTeam)
+                ? persistedTechnicalTeam
+                    .slice(0, maxTechnicalCards)
+                    .map(member => ({
+                        name: typeof member?.name === 'string' ? member.name : '',
+                        country: typeof member?.country === 'string' && member.country.trim() ? member.country : technicalCountries[0]
+                    }))
+                : Array.isArray(persistedState.technicalTeam)
                 ? persistedState.technicalTeam
                     .slice(0, maxTechnicalCards)
                     .map(member => ({
                         name: typeof member?.name === 'string' ? member.name : '',
-                        country: technicalCountries.includes(member?.country) ? member.country : technicalCountries[0]
+                        country: typeof member?.country === 'string' && member.country.trim() ? member.country : technicalCountries[0]
                     }))
                 : [],
             victoriesText: typeof persistedState.victoriesText === 'string' ? persistedState.victoriesText : ''
@@ -759,6 +778,7 @@
         function saveDashboardState() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                localStorage.setItem(TECHNICAL_TEAM_STORAGE_KEY, JSON.stringify(appState.technicalTeam));
             } catch {
             }
         }
@@ -990,16 +1010,20 @@
                 const memberState = appState.technicalTeam[index];
                 const currentValue = memberState?.country || select.value || technicalCountries[0];
 
-                select.innerHTML = technicalCountries
+                const countryOptions = currentValue && !technicalCountries.includes(currentValue)
+                    ? [currentValue, ...technicalCountries]
+                    : technicalCountries;
+
+                select.innerHTML = countryOptions
                     .map(country => `<option value="${country}">${country}</option>`)
                     .join('');
 
-                const nextValue = technicalCountries.includes(currentValue) ? currentValue : technicalCountries[0];
+                const nextValue = currentValue || technicalCountries[0];
                 select.value = nextValue;
 
                 if (memberState) {
                     memberState.country = nextValue;
-                    const card = select.closest('div.bg-white\/90');
+                    const card = select.closest('.bg-white\\/90');
                     const flagElement = card?.querySelector('.technical-flag');
                     if (flagElement) {
                         flagElement.src = getFlagUrl(nextValue);
@@ -1023,10 +1047,11 @@
 
                 technicalCountries = parsedCountries;
 
-                appState.technicalTeam = appState.technicalTeam.map(member => ({
-                    ...member,
-                    country: technicalCountries.includes(member.country) ? member.country : technicalCountries[0]
-                }));
+                appState.technicalTeam.forEach(member => {
+                    if (!member.country) {
+                        member.country = technicalCountries[0];
+                    }
+                });
 
                 refreshTechnicalCountryDropdownOptions();
                 syncWelcomeCountriesWithTechnical();
@@ -1113,11 +1138,13 @@
         function createTechnicalCard(memberState, shouldPersist = true) {
             if (technicalCardsCount >= maxTechnicalCards) return;
 
-            const countryOptions = technicalCountries
+            const initialCountry = memberState.country || technicalCountries[0];
+            const countryOptionValues = initialCountry && !technicalCountries.includes(initialCountry)
+                ? [initialCountry, ...technicalCountries]
+                : technicalCountries;
+            const countryOptions = countryOptionValues
                 .map(country => `<option value="${country}">${country}</option>`)
                 .join('');
-
-            const initialCountry = technicalCountries.includes(memberState.country) ? memberState.country : technicalCountries[0];
 
             const card = document.createElement('div');
             card.className = 'bg-white/90 p-2 rounded-lg border border-slate-100 shadow-sm flex flex-col gap-1';
