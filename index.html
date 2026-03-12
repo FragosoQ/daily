@@ -163,9 +163,11 @@
         .team-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(6, minmax(0, 1fr));
+            grid-template-rows: repeat(var(--team-grid-rows, 6), minmax(0, 1fr));
+            flex: 1 1 auto;
+            min-height: 0;
             column-gap: 0.4rem;
-            row-gap: 0.005rem;
+            row-gap: 0.35rem;
         }
 
         .technical-grid {
@@ -234,8 +236,7 @@
         }
 
         #teamList > div {
-            height: 80%;
-            align-self: start;
+            min-height: 0;
         }
 
         .refresh-pie-widget {
@@ -940,6 +941,12 @@
             return sections;
         }
 
+        function updateTeamGridRows() {
+            const columns = 2;
+            const rowCount = Math.max(1, Math.ceil(appState.team.length / columns));
+            teamList.style.setProperty('--team-grid-rows', String(rowCount));
+        }
+
         function refreshNameDropdownOptions() {
             const presentSelects = [...document.querySelectorAll('.present-name-select')];
             presentSelects.forEach((select, index) => {
@@ -1095,6 +1102,7 @@
 
             teamList.appendChild(div);
         });
+        updateTeamGridRows();
 
         let technicalCardsCount = 0;
         const technicalCountryCodes = countryFlagCodes;
