@@ -411,7 +411,7 @@
                     <p class="text-[10px] text-blue-50 italic leading-tight max-w-[180px]"></p>
                     <div class="flex-1 min-h-0 mt-1 w-[66%] mx-auto p-2 rounded-md overflow-hidden flex items-center justify-center">
                         <div style="background: rgba(214, 213, 213, 0.45); border-radius: 16px; padding: 0.5rem 1rem; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                            <img id="visitorLogoPreview" src="https://scontent-lis1-1.xx.fbcdn.net/v/t39.30808-1/286012976_346891200884859_7888394419205345665_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=103&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=6ShWP5sIf3kQ7kNvwEsBKBA&_nc_oc=AdrDnWF__fQCuMk3yLXgnwtu34Z0mM2oFjz1BM2l7xbH_-raAvFo488EsK81y2BbhU0&_nc_zt=24&_nc_ht=scontent-lis1-1.xx&_nc_gid=M1SkKZ-E6iIxd4D_Ccj0Ag&_nc_ss=7a3a8&oh=00_Af0epV0SDuB9oxJixXMyXvlSvYbZ3GNLH_9XKnJuTa5eAA&oe=69EBBED8" alt="Logo do cliente" class="max-w-full max-h-full object-contain rounded-md" style="z-index: 1;">
+                            <img id="visitorLogoPreview" src="https://res.cloudinary.com/djxxk3ipz/image/upload/v1776672382/286012976_346891200884859_7888394419205345665_n_p0xnh8.jpg" alt="Logo do cliente" class="max-w-full max-h-full object-contain rounded-md" style="z-index: 1;">
                             
                             <!--https://viapane.com.br/wp-content/uploads/logo-1.png-->
                             <!--https://static.wixstatic.com/media/a6967f_4c5d159ad7b942829a0e55dfe8f54567~mv2.png Ramirez-->
@@ -721,11 +721,11 @@
             'UZBEQUISTÃO': 'Xush kelibsiz'
         };
 
-        let welcomeCountries = ['PORTUGAL', 'ESPANHA', 'FRANÇA', 'ALEMANHA', 'BRASIL', 'USA'];
+        let welcomeCountries = ['PORTUGAL', 'ESPANHA', 'FRANÇA', 'ALEMANHA', 'BRASIL', 'USA', 'INDONÉSIA'];
 
         function getWelcomeCountriesWithRequiredOptions(countries) {
-            const requiredCountries = ['BRASIL'];
-            const uniqueCountries = [...new Set([...(countries || []), ...requiredCountries])];
+            const requiredCountries = ['BRASIL', 'INDONÉSIA'];
+            const uniqueCountries = [...new Set([...requiredCountries, ...(countries || [])])];
             return uniqueCountries;
         }
 
