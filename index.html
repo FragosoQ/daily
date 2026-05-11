@@ -1313,9 +1313,10 @@
 
 function getPlanningFillColor(evoValue) {
     if (evoValue >= 80) return 'rgba(34, 197, 94, 0.55)';
-            if (evoValue >= 60) return 'rgba(5, 213, 245, 0.55)';
+    if (evoValue >= 60) return 'rgba(5, 213, 245, 0.55)';
     if (evoValue >= 35) return 'rgba(0, 255, 255, 0.5)';
-    return 'rgba(234, 179, 8, 0.5)';
+    if (evoValue >= 15) return 'rgba(234, 179, 8, 0.5)';
+    return 'rgba(255, 102, 0, 0.6)';
 }
 
         function parseEvo(value) {
@@ -1420,8 +1421,8 @@ function getPlanningFillColor(evoValue) {
                     .map(columns => ({
                         post: (columns[0] || '').trim(),
                         country: (columns[9] || '').trim(),
-                        lot: (columns[11] || '').trim(),
-                        evo: (columns[22] || '').trim()
+                        lot: (columns[11] || '').trim(),  // MODELO (coluna L)
+                        evo: (columns[22] || '').trim()   // EVOLUÇÃO (coluna W)
                     }))
                     .filter(item => item.post || item.country || item.lot || item.evo)
                     .slice(0, maxPlanningRows);
@@ -1429,9 +1430,9 @@ function getPlanningFillColor(evoValue) {
                 const mappedWeldingRows = weldingRows
                     .map(columns => ({
                         post: (columns[0] || '').trim(),
-                        lot: (columns[1] || '').trim(),
-                        quantity: (columns[2] || '').trim(),
-                        evo: (columns[19] || '').trim(),
+                        lot: (columns[1] || '').trim(),       // LOTE (coluna B)
+                        quantity: (columns[2] || '').trim(),  // QUANTIDADE / LOTE
+                        evo: (columns[11] || '').trim(),      // GERAL(T) (coluna L)
                         section: 'Soldadura'
                     }))
                     .filter(item => item.lot !== '')
