@@ -319,7 +319,7 @@
                     <span id="safetyCounter" class="text-2xl font-black text-white">0 Dias</span>
                     <div class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.7)]"></div>
                 </div>
-                <!--<span class="text-[11px] text-slate-400 uppercase font-bold tracking-tight mt-1">Sem Acidentes</span>-->
+                <!--<span class="text-[11px] text-slate-400 uppercase font-bold tracking-tight mt-1">Sem Acidentes</span>--> <!--TIME TO BEAT: 564dias-->
             </div>
 
             <div class="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col items-end gap-1 text-right">
@@ -469,12 +469,13 @@
         </footer>
 
     </div>
-
+<!-- 05/01/2025 último restart-->
     <script>
         const PAGE_REFRESH_MS = 1000 * 60 * 60 * 2;
         const pageRefreshAt = Date.now() + PAGE_REFRESH_MS;
-        const SAFETY_START_DATE = new Date(2025, 0, 5);
+        const SAFETY_START_DATE = new Date(2026, 6, 24);
 
+        
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('pt-PT');
