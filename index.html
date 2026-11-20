@@ -1469,6 +1469,55 @@ function getPlanningFillColor(evoValue) {
 
         loadPlanningFromSheet();
 
+        // Logo da visita do dia: separador "visits" (Dia planeado = hoje -> usa o URL da coluna Logo)
+        const visitsSheetCsvUrl = 'https://docs.google.com/spreadsheets/d/1Fua0xkGpNYN2iJajUMChg8rdVB4UNf9Q6owSGZ9X_04/gviz/tq?tqx=out:csv&sheet=visits';
+        const visitorLogoPreview = document.getElementById('visitorLogoPreview');
+
+        function getTodayKey() {
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        }
+
+        function normalizeSheetDate(value) {
+            const text = (value || '').trim();
+            let match = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (match) return `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`;
+            match = text.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
+            if (match) return `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
+            return '';
+        }
+
+        async function updateVisitorLogoFromSheet() {
+            try {
+                const response = await fetch(visitsSheetCsvUrl, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const rows = parseCsv(await response.text());
+                const header = (rows[0] || []).map(h => (h || '').trim().toLowerCase());
+                const dayIndex = header.indexOf('dia planeado');
+                const logoIndex = header.indexOf('logo');
+                if (dayIndex === -1 || logoIndex === -1) return;
+
+                const todayKey = getTodayKey();
+                const todayLogos = rows.slice(1)
+                    .filter(columns => normalizeSheetDate(columns[dayIndex]) === todayKey)
+                    .map(columns => (columns[logoIndex] || '').trim())
+                    .filter(url => /^https?:\/\//i.test(url));
+
+                // Se houver várias visitas hoje, usa a última linha com logo
+                const logoUrl = todayLogos[todayLogos.length - 1];
+                if (logoUrl && visitorLogoPreview.src !== logoUrl) {
+                    visitorLogoPreview.src = logoUrl;
+                }
+            } catch (error) {
+                // Mantém o logo atual em caso de erro
+            }
+        }
+
+        updateVisitorLogoFromSheet();
+        setInterval(updateVisitorLogoFromSheet, 1000 * 60 * 15);
+
         document.addEventListener('keydown', (e) => {
             if(e.key.toLowerCase() === 'h') {
                 const card = document.getElementById('welcomeCard');
