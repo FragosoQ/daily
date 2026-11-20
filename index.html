@@ -741,6 +741,8 @@
         };
 
         let welcomeCountries = ['PORTUGAL', 'ESPANHA', 'FRANÇA', 'ALEMANHA', 'BRASIL', 'USA', 'INDONÉSIA'];
+        // País da visita de hoje (definido pelo separador "visits"); tem prioridade sobre a escolha manual guardada
+        let sheetWelcomeCountry = null;
 
         function getWelcomeCountriesWithRequiredOptions(countries) {
             const requiredCountries = ['BRASIL', 'INDONÉSIA'];
@@ -850,9 +852,10 @@
             welcomeCountries = getWelcomeCountriesWithRequiredOptions(technicalCountries);
             renderWelcomeFlagMenu();
 
-            const nextCountry = welcomeCountries.includes(appState.welcomeCountry)
-                ? appState.welcomeCountry
-                : (welcomeCountries[0] || 'PORTUGAL');
+            const nextCountry = sheetWelcomeCountry
+                || (welcomeCountries.includes(appState.welcomeCountry)
+                    ? appState.welcomeCountry
+                    : (welcomeCountries[0] || 'PORTUGAL'));
 
             updateWelcomeCardByCountry(nextCountry, false);
         }
@@ -1488,27 +1491,65 @@ function getPlanningFillColor(evoValue) {
             return '';
         }
 
+        // Nomes de país usados na folha que diferem das chaves de welcomeTranslations
+        const welcomeCountryAliases = {
+            'REINO UNIDO': 'UK',
+            'INGLATERRA': 'UK',
+            'ESTADOS UNIDOS': 'USA',
+            'EUA': 'USA',
+            'HOLANDA': 'PAISES BAIXOS',
+            'EGITO': 'EGIPTO',
+            'REPUBLICA CHECA': 'REP. CHECA',
+            'REPUBLICA DOMINICANA': 'REP. DOMINICANA',
+            'ARABIA SAUDITA': 'SAUDI ARABIA',
+            'EMIRADOS ARABES UNIDOS': 'DUBAI'
+        };
+
+        function resolveWelcomeCountry(value) {
+            let key = normalizeCountryKey(value);
+            if (!key) return null;
+            key = normalizeCountryKey(welcomeCountryAliases[key] || key);
+            return Object.keys(welcomeTranslations).find(country => normalizeCountryKey(country) === key) || null;
+        }
+
         async function updateVisitorLogoFromSheet() {
             try {
                 const response = await fetch(visitsSheetCsvUrl, { cache: 'no-store' });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                 const rows = parseCsv(await response.text());
-                const header = (rows[0] || []).map(h => (h || '').trim().toLowerCase());
-                const dayIndex = header.indexOf('dia planeado');
-                const logoIndex = header.indexOf('logo');
-                if (dayIndex === -1 || logoIndex === -1) return;
+                const header = (rows[0] || []).map(h => normalizeCountryKey(h));
+                const dayIndex = header.indexOf('DIA PLANEADO');
+                const logoIndex = header.indexOf('LOGO');
+                const countryIndex = header.indexOf('PAIS');
+                const visitIndex = header.indexOf('VISITA');
+                if (dayIndex === -1) return;
 
                 const todayKey = getTodayKey();
-                const todayLogos = rows.slice(1)
+                const todayRows = rows.slice(1)
                     .filter(columns => normalizeSheetDate(columns[dayIndex]) === todayKey)
-                    .map(columns => (columns[logoIndex] || '').trim())
-                    .filter(url => /^https?:\/\//i.test(url));
+                    .filter(columns => visitIndex === -1 || normalizeCountryKey(columns[visitIndex]) !== 'ANULADO');
 
-                // Se houver várias visitas hoje, usa a última linha com logo
-                const logoUrl = todayLogos[todayLogos.length - 1];
-                if (logoUrl && visitorLogoPreview.src !== logoUrl) {
-                    visitorLogoPreview.src = logoUrl;
+                // Se houver várias visitas hoje, usa a última linha válida
+                if (logoIndex !== -1) {
+                    const todayLogos = todayRows
+                        .map(columns => (columns[logoIndex] || '').trim())
+                        .filter(url => /^https?:\/\//i.test(url));
+                    const logoUrl = todayLogos[todayLogos.length - 1];
+                    if (logoUrl && visitorLogoPreview.src !== logoUrl) {
+                        visitorLogoPreview.src = logoUrl;
+                    }
+                }
+
+                if (countryIndex !== -1) {
+                    const todayCountries = todayRows
+                        .map(columns => resolveWelcomeCountry(columns[countryIndex]))
+                        .filter(Boolean);
+                    const country = todayCountries[todayCountries.length - 1] || null;
+                    if (country !== sheetWelcomeCountry) {
+                        sheetWelcomeCountry = country;
+                        if (country) updateWelcomeCardByCountry(country, false);
+                    }
                 }
             } catch (error) {
                 // Mantém o logo atual em caso de erro
